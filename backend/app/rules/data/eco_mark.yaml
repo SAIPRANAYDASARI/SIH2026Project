@@ -1,0 +1,36 @@
+code: ECO_MARK
+name: "Eco Mark"
+description: >
+  Voluntary certification for consumer products that meet specified
+  environmental criteria in addition to the relevant Indian Standard's
+  quality requirements, administered alongside the ISI mark scheme.
+product_keywords:
+  - eco-friendly
+  - biodegradable
+  - environment friendly
+  - recycled
+  - soap
+  - detergent
+  - paint
+  - paper
+  - packaging
+mandatory: false
+fees:
+  - category: "Application fee"
+    fee_inr: 1000
+    unit: "one-time"
+  - category: "Licence fee"
+    fee_inr: 2000
+    unit: "per annum, in addition to the base ISI licence fee"
+timeline_days: 90
+validity_years: 2
+required_documents:
+  - name: "ISI mark licence for the underlying product standard"
+    required: true
+    notes: "Eco Mark is granted in addition to, not instead of, the relevant product ISI licence."
+  - name: "Environmental criteria compliance test reports"
+    required: true
+source_note: >
+  Illustrative placeholder values pending verified BIS circulars — confirm
+  fees, timelines and document requirements directly with BIS before acting
+  on them.

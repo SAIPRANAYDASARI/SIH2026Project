@@ -1,0 +1,14 @@
+# Root-level ruff config, applied to `ingestion/` and `worker/` (files under
+# `backend/` use `backend/pyproject.toml` instead — ruff resolves to the
+# nearest config file per-file, so both apply without conflicting).
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+exclude = ["backend", "frontend"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "ASYNC"]
+ignore = ["B008"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app", "ingestion", "worker"]

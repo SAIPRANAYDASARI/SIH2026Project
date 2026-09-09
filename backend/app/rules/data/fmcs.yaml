@@ -1,0 +1,37 @@
+code: FMCS
+name: "Foreign Manufacturers Certification Scheme (FMCS)"
+description: >
+  BIS product certification for manufacturers located outside India, for
+  products covered under BIS Act Scheme I but manufactured abroad.
+  Equivalent inspection and surveillance to a domestic Scheme I licence,
+  conducted at the overseas factory.
+product_keywords:
+  - imported
+  - foreign manufacturer
+  - overseas factory
+  - export to india
+mandatory: false
+fees:
+  - category: "Application fee"
+    fee_inr: 2000
+    unit: "one-time"
+  - category: "Licence fee"
+    fee_inr: 2000
+    unit: "per annum"
+  - category: "Inspection/travel cost"
+    fee_inr: 150000
+    unit: "per inspection visit (actuals, varies by country)"
+timeline_days: 120
+validity_years: 1
+required_documents:
+  - name: "Factory audit readiness documentation"
+    required: true
+  - name: "Authorised Indian representative appointment letter"
+    required: true
+  - name: "Test reports from a BIS-recognised or accepted overseas lab"
+    required: true
+source_note: >
+  Illustrative placeholder values pending verified BIS circulars — confirm
+  fees, timelines and document requirements directly with BIS before acting
+  on them. Inspection travel costs are billed at actuals and vary widely by
+  destination country.

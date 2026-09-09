@@ -1,0 +1,42 @@
+## Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+htmlcov/
+.coverage
+
+## Node / frontend
+node_modules/
+frontend/dist/
+frontend/.vite/
+
+## Env
+.env
+.env.*
+!.env.example
+
+## Data / blobs (Step 2+)
+data/blobs/
+data/raw/
+*.sqlite3
+
+## Generated RAG index (rebuild with: python -m rag.cli build && python -m rag.cli embed)
+rag_index/
+*.npy
+
+## Worker scratch data
+worker/data/blobs/
+
+## Docker
+*.log
+
+## OS / editor
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea/

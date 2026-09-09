@@ -1,0 +1,142 @@
+# Development stack. `docker compose -f infra/docker-compose.yml up --build`
+# from the repo root brings up everything Step 1 needs: Postgres+pgvector,
+# Redis, the FastAPI backend with hot reload, a Celery worker, the Vite dev
+# server, and a local Ollama container (the on-premise LLM/embeddings path —
+# see docs/DECISIONS.md decision #3). A separate production compose file
+# (Nginx + built frontend + SSE-safe proxying) is added in Step 13.
+
+name: manak-sahayak
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-manak_sahayak}
+      POSTGRES_USER: ${POSTGRES_USER:-manak}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-manak} -d ${POSTGRES_DB:-manak_sahayak}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    # Pull the configured model on first boot; safe to re-run (idempotent).
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        ollama serve &
+        sleep 3
+        ollama pull ${OLLAMA_MODEL:-llama3.1:8b} || true
+        ollama pull ${OLLAMA_EMBEDDING_MODEL:-bge-m3} || true
+        wait
+
+  reranker:
+    # Cross-encoder reranking (bge-reranker-v2-m3). Ollama doesn't serve
+    # rerank models, so this runs on Infinity, a small Cohere-rerank-API-
+    # compatible inference server — see docs/DECISIONS.md.
+    image: michaelf34/infinity:latest
+    restart: unless-stopped
+    ports:
+      - "7997:7997"
+    volumes:
+      - reranker_data:/app/.cache
+    command: >
+      v2 --model-id BAAI/bge-reranker-v2-m3 --port 7997
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7997/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 60s
+
+  backend:
+    build:
+      context: ../backend
+      target: development
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      POSTGRES_HOST: postgres
+      REDIS_HOST: redis
+      OLLAMA_BASE_URL: http://ollama:11434
+      RERANKER_BASE_URL: http://reranker:7997
+    volumes:
+      - ../backend:/app
+      - ../eval:/eval
+      - blob_data:/data/blobs
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+
+  worker:
+    build:
+      context: ..
+      dockerfile: worker/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      POSTGRES_HOST: postgres
+      REDIS_HOST: redis
+      OLLAMA_BASE_URL: http://ollama:11434
+    volumes:
+      - ../backend/app:/backend/app
+      - ../ingestion:/ingestion
+      - ../worker:/worker
+      - blob_data:/data/blobs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ../frontend
+      target: development
+    restart: unless-stopped
+    environment:
+      VITE_API_PROXY_TARGET: http://backend:8000
+    volumes:
+      - ../frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  ollama_data:
+  reranker_data:
+  blob_data:

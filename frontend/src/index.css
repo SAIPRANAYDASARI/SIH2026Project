@@ -1,0 +1,132 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* "Midnight Aurora": a deep navy-slate base with an electric indigo →
+   cyan accent ramp. Chosen over a single flat hue because almost every
+   accent in this UI is a gradient between `--primary` and `--glow`, so the
+   two need to be far enough apart on the wheel to read as a gradient and
+   close enough to stay harmonious.
+
+   The 3D backdrop (components/background/AuroraBackground) sits behind
+   everything, so surfaces stay dark and translucent enough to let it show
+   through without costing text contrast — foreground on surface is well
+   past WCAG AA.
+
+   Components consume these via Tailwind's `hsl(var(--...) / <alpha-value>)`
+   mapping in tailwind.config.ts — never a raw hex — so a theme swap, or an
+   opacity modifier for a glass panel, never touches component code. */
+:root {
+  --background: 224 47% 6%;
+  --foreground: 210 40% 97%;
+  --surface: 223 40% 11%;
+  --border: 220 28% 25%;
+  --primary: 250 88% 68%;
+  --primary-foreground: 224 47% 7%;
+  --muted: 220 26% 16%;
+  --muted-foreground: 216 20% 72%;
+  --destructive: 350 82% 64%;
+  --success: 158 64% 50%;
+  --warning: 38 94% 60%;
+  --glow: 190 95% 60%;
+}
+
+/* The design is dark by default; `.dark` keeps the same palette so the
+   class toggling elsewhere in the app stays a no-op rather than flipping
+   into an unfinished light theme. */
+.dark {
+  --background: 224 47% 6%;
+  --foreground: 210 40% 97%;
+  --surface: 223 40% 11%;
+  --border: 220 28% 25%;
+  --primary: 250 88% 68%;
+  --primary-foreground: 224 47% 7%;
+  --muted: 220 26% 16%;
+  --muted-foreground: 216 20% 72%;
+  --destructive: 350 82% 64%;
+  --success: 158 64% 50%;
+  --warning: 38 94% 60%;
+  --glow: 190 95% 60%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+body {
+  @apply bg-background text-foreground antialiased;
+}
+
+/* Thin, glass-friendly scrollbar for the message list / citation panel —
+   the default chrome scrollbar looks out of place against a frosted panel. */
+.aurora-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--primary) / 0.35) transparent;
+}
+.aurora-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+.aurora-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.aurora-scroll::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--primary) / 0.28);
+  border-radius: 9999px;
+}
+.aurora-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--primary) / 0.5);
+}
+
+/* Lit hairline along the top edge of a panel — gives glass surfaces a
+   caught-light edge without the weight of a full border. */
+.edge-lit {
+  position: relative;
+}
+.edge-lit::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    hsl(var(--primary) / 0.6),
+    hsl(var(--glow) / 0.45),
+    transparent
+  );
+  pointer-events: none;
+}
+
+/* Gradient hairline border via a masked pseudo-element. Used on cards that
+   should feel "premium" without the flat look of a solid 1px border. */
+.gradient-border {
+  position: relative;
+}
+.gradient-border::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    140deg,
+    hsl(var(--primary) / 0.55),
+    transparent 40%,
+    transparent 60%,
+    hsl(var(--glow) / 0.4)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}

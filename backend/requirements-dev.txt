@@ -1,0 +1,19 @@
+-r requirements.txt
+# Only needed to run `python -m ingestion.cli` from a bare local venv (e.g.
+# outside Docker, for a quick interrogation without docker compose running).
+# Inside Docker, crawlers run in the worker container, which already has
+# these via worker/requirements.txt — see docs/RUNBOOK.md.
+beautifulsoup4==4.12.3
+lxml==5.3.0
+pypdf==5.1.0
+# fpdf2 is test-fixture-only: ingestion/tests uses it to generate a real PDF
+# with actual text to parse against, rather than a hand-built byte fixture.
+fpdf2==2.8.2
+ruff==0.8.4
+mypy==1.14.1
+pytest==8.3.4
+pytest-asyncio==0.25.1
+pytest-cov==6.0.0
+aiosqlite==0.20.0
+types-python-jose==3.3.4.20240106
+types-PyYAML==6.0.12.20250516

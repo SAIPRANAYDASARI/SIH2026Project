@@ -1,0 +1,38 @@
+code: CRS
+name: "Compulsory Registration Scheme (CRS)"
+description: >
+  Mandatory registration under the Electronics and IT Goods (Requirements
+  for Compulsory Registration) Order for notified electronics/IT products.
+  Registration is granted after testing at a BIS-recognised lab; there is
+  no ongoing factory audit like Scheme I.
+product_keywords:
+  - laptop
+  - mobile phone
+  - power bank
+  - led light
+  - adapter
+  - charger
+  - television
+  - printer
+  - electronic
+  - it good
+mandatory: true
+fees:
+  - category: "Registration fee"
+    fee_inr: 20000
+    unit: "per model, one-time"
+timeline_days: 30
+validity_years: 2
+required_documents:
+  - name: "Test report from a BIS-recognised laboratory"
+    required: true
+  - name: "Authorised Indian representative details (for foreign manufacturers)"
+    required: false
+    notes: "Required only when the manufacturer is located outside India."
+  - name: "Product technical specification sheet"
+    required: true
+source_note: >
+  Illustrative placeholder values pending verified BIS circulars — confirm
+  fees, timelines and document requirements directly with BIS before acting
+  on them. The notified product list under the CRS order changes over time;
+  always check the current QCO/CRS order for the exact product scope.

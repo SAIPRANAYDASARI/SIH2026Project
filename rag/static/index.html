@@ -1,0 +1,1986 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Manak Sahayak — BIS Standards Assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Devanagari:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#f6f5f2;      --bg2:#efeee9;   --panel:#ffffff;  --panel2:#faf9f6;
+  --ink:#12182b;     --ink2:#3f4657;  --muted:#8b8578;  --line:#dfdcd4;
+  --brand:#0f1b3d;   --brand2:#1e3a8a; --accent:#c2410c;
+  --navy:#0f1b3d;    --rule:#eeece6;
+  --ok:#047857;      --okbg:#ecfdf5;  --warn:#b45309;   --warnbg:#fffbeb;
+  --info:#0369a1;    --infobg:#f0f9ff;
+  --code:#f1f5f9;    --shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px rgba(15,23,42,.06);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#12151c;    --bg2:#171b24;   --panel:#1a1f29;  --panel2:#20262f;
+    --ink:#e9e6df;   --ink2:#c8c4ba;  --muted:#918b7e;  --line:#2c323d;
+    --brand:#0a0f1f; --brand2:#93b4f5; --accent:#fb923c;
+    --navy:#0a0f1f;  --rule:#272d38;
+    --ok:#34d399;    --okbg:#052e23;  --warn:#fbbf24;   --warnbg:#2a1f06;
+    --info:#7dd3fc;  --infobg:#082f42;
+    --code:#1a2230;  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12151c;    --bg2:#171b24;   --panel:#1a1f29;  --panel2:#20262f;
+  --ink:#e9e6df;   --ink2:#c8c4ba;  --muted:#918b7e;  --line:#2c323d;
+  --brand:#0a0f1f; --brand2:#93b4f5; --accent:#fb923c;
+  --navy:#0a0f1f;  --rule:#272d38;
+  --ok:#34d399;    --okbg:#052e23;  --warn:#fbbf24;   --warnbg:#2a1f06;
+  --info:#7dd3fc;  --infobg:#082f42;
+  --code:#1a2230;  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.65 "IBM Plex Sans","IBM Plex Sans Devanagari","Segoe UI",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased}
+a{color:var(--brand2)}
+
+header{position:sticky;top:0;z-index:40;background:color-mix(in srgb,var(--panel) 90%,transparent);
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.hwrap{max-width:900px;margin:0 auto;padding:12px 20px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:11px;margin-right:auto}
+.mark{width:36px;height:36px;border-radius:10px;flex:none;
+  background:linear-gradient(135deg,var(--brand2),var(--accent));
+  display:grid;place-items:center;color:#fff;font-weight:800;font-size:15px;
+  box-shadow:0 4px 14px color-mix(in srgb,var(--brand2) 35%,transparent)}
+.brand h1{margin:0;font-size:16.5px;font-weight:700;line-height:1.2}
+.brand span{display:block;font-size:11.5px;color:var(--muted);font-weight:500}
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+.chip{font-size:11.5px;padding:4px 10px;border-radius:20px;border:1px solid var(--line);
+  background:var(--panel2);color:var(--ink2);white-space:nowrap;font-variant-numeric:tabular-nums}
+.chip b{color:var(--ink);font-weight:700}
+.chip.live::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;
+  background:var(--ok);margin-right:6px;vertical-align:1px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.iconbtn{height:34px;min-width:34px;padding:0 9px;border-radius:9px;border:1px solid var(--line);
+  background:var(--panel2);color:var(--ink2);cursor:pointer;font:600 13px/1 inherit;
+  display:grid;place-items:center;transition:.15s}
+.iconbtn:hover{background:var(--bg2);color:var(--ink)}
+
+main{max-width:900px;margin:0 auto;padding:22px 20px 160px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+.intro{padding:24px 26px 22px}
+.intro h2{margin:0 0 8px;font-size:20px}
+.intro p{margin:0 0 6px;color:var(--ink2)}
+.exwrap{margin-top:16px;display:flex;gap:8px;flex-wrap:wrap}
+.ex{border:1px solid var(--line);background:var(--panel2);color:var(--ink2);border-radius:20px;
+  padding:7px 13px;font:inherit;font-size:12.5px;cursor:pointer;transition:.15s}
+.ex:hover{border-color:var(--brand2);color:var(--brand2);transform:translateY(-1px)}
+
+.msg{margin:16px 0}
+.you{display:flex;justify-content:flex-end}
+.you div{background:linear-gradient(135deg,var(--brand2),color-mix(in srgb,var(--brand2) 75%,var(--accent)));
+  color:#fff;padding:11px 16px;border-radius:16px 16px 4px 16px;max-width:78%;box-shadow:var(--shadow)}
+.bot{padding:18px 20px}
+.meta{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:6px;border:1px solid var(--line);
+  color:var(--muted);background:var(--panel2)}
+.badge.ok{color:var(--ok);background:var(--okbg);border-color:color-mix(in srgb,var(--ok) 35%,transparent)}
+.badge.no{color:var(--warn);background:var(--warnbg);border-color:color-mix(in srgb,var(--warn) 35%,transparent)}
+.badge.info{color:var(--info);background:var(--infobg);border-color:color-mix(in srgb,var(--info) 40%,transparent)}
+.answer{white-space:pre-wrap;word-wrap:break-word;font-size:15px}
+.answer strong{font-weight:680}
+.answer code{background:var(--code);padding:1.5px 6px;border-radius:5px;font-size:13px;
+  font-family:ui-monospace,Consolas,monospace}
+.cite{display:inline-block;background:color-mix(in srgb,var(--brand2) 14%,transparent);
+  color:var(--brand2);font-weight:700;font-size:11.5px;padding:1px 7px;border-radius:5px;
+  cursor:pointer;vertical-align:1px;border:1px solid color-mix(in srgb,var(--brand2) 30%,transparent)}
+.cite:hover{background:var(--brand2);color:#fff}
+
+.unverified{border-left:3px solid var(--info);background:var(--infobg);padding:10px 14px;
+  border-radius:0 8px 8px 0;margin-bottom:12px;font-size:12.5px;color:var(--ink2)}
+
+.tools{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}
+.tool{border:1px solid var(--line);background:var(--panel2);color:var(--muted);border-radius:8px;
+  padding:5px 11px;font:600 11.5px/1.4 inherit;cursor:pointer;transition:.15s}
+.tool:hover{border-color:var(--brand2);color:var(--brand2)}
+.tool[aria-pressed="true"]{background:var(--brand2);color:#fff;border-color:transparent}
+
+.srcs{margin-top:18px;border-top:1px dashed var(--line);padding-top:14px}
+.srcs h4{margin:0 0 11px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.09em;
+  text-transform:uppercase}
+.src{border:1px solid var(--line);border-left:3px solid var(--brand2);border-radius:0 10px 10px 0;
+  padding:11px 14px;margin-bottom:9px;background:var(--panel2);transition:.2s}
+.src.flash{border-left-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+.src .top{display:flex;gap:9px;align-items:baseline;flex-wrap:wrap}
+.sn{font-weight:800;color:var(--brand2);font-size:12px}
+.st{font-weight:650;font-size:13.5px}
+.sl{font-family:ui-monospace,Consolas,monospace;font-size:11px;color:var(--muted);
+  margin-top:4px;word-break:break-all}
+.src details{margin-top:8px}
+.src summary{cursor:pointer;font-size:12px;color:var(--brand2);font-weight:600}
+.src blockquote{margin:8px 0 0;padding:11px 13px;background:var(--panel);border:1px solid var(--line);
+  border-radius:8px;font-size:12.5px;white-space:pre-wrap;max-height:260px;overflow:auto;
+  color:var(--ink2);line-height:1.65}
+
+.followups{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line)}
+.followups h5{margin:0 0 8px;font-size:11px;font-weight:700;color:var(--muted);
+  letter-spacing:.08em;text-transform:uppercase}
+
+footer{position:fixed;bottom:0;left:0;right:0;z-index:30;
+  background:linear-gradient(to top,var(--bg) 62%,transparent);padding:14px 20px 16px}
+.bar2{max-width:900px;margin:0 auto;background:var(--panel);border:1px solid var(--line);
+  border-radius:15px;padding:9px 10px 9px 15px;display:flex;gap:9px;align-items:center;
+  flex-wrap:wrap;box-shadow:var(--shadow)}
+.bar2:focus-within{border-color:var(--brand2);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--brand2) 16%,transparent),var(--shadow)}
+#q{flex:1 1 260px;border:0;background:none;color:var(--ink);font:inherit;padding:7px 0;outline:none;min-width:0}
+#q::placeholder{color:var(--muted)}
+.tog{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);cursor:pointer;
+  user-select:none;white-space:nowrap}
+.go{border:0;border-radius:10px;padding:9px 18px;font:700 13.5px/1 inherit;cursor:pointer;color:#fff;
+  background:linear-gradient(135deg,var(--brand2),var(--accent));transition:.15s;
+  box-shadow:0 3px 12px color-mix(in srgb,var(--brand2) 32%,transparent)}
+.go:hover:not(:disabled){transform:translateY(-1px)}
+.go:disabled{opacity:.55;cursor:default;transform:none}
+#mic.on{background:var(--accent);color:#fff;border-color:transparent}
+.hint{max-width:900px;margin:8px auto 0;font-size:11px;color:var(--muted);text-align:center}
+.load{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13.5px}
+.ptime{font-variant-numeric:tabular-nums;opacity:.6;font-size:12px}
+.sp{width:15px;height:15px;border:2px solid var(--line);border-top-color:var(--brand2);
+  border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%);background:var(--ink);
+  color:var(--bg);padding:9px 16px;border-radius:9px;font-size:12.5px;z-index:60;
+  opacity:0;transition:.25s;pointer-events:none}
+.toast.show{opacity:1}
+/* ── Tabs & feature views ─────────────────────────────────────────── */
+nav#tabs{max-width:900px;margin:0 auto;padding:0 20px;display:flex;gap:2px;overflow-x:auto}
+.tab{padding:9px 14px;border:0;background:none;color:var(--muted);font:600 13px/1 inherit;
+  cursor:pointer;border-bottom:2px solid transparent;transition:.15s;white-space:nowrap}
+.tab:hover{color:var(--ink2)}
+.tab[aria-selected="true"]{color:var(--brand2);border-bottom-color:var(--brand2)}
+.view{display:none}
+.view.on{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+input.inline{flex:1 1 240px;padding:10px 13px;border:1px solid var(--line);border-radius:10px;
+  background:var(--panel2);color:var(--ink);font:inherit;outline:none;min-width:0}
+input.inline:focus{border-color:var(--brand2)}
+
+/* Timeline */
+.tl{position:relative;margin:6px 0 0;padding-left:26px}
+.tl::before{content:"";position:absolute;left:8px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.tlitem{position:relative;padding:12px 0 12px 4px}
+.tlitem::before{content:"";position:absolute;left:-22px;top:18px;width:11px;height:11px;
+  border-radius:50%;background:var(--brand2);border:2px solid var(--panel)}
+.tlitem.orig::before{background:var(--ok)}
+.tlitem.undated::before{background:var(--muted)}
+.tldate{font-weight:700;font-size:13px;font-variant-numeric:tabular-nums}
+.tlkind{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--muted);margin-left:8px}
+.tlmeta{font-family:ui-monospace,Consolas,monospace;font-size:11px;color:var(--muted);margin-top:3px;
+  word-break:break-all}
+.gz{display:inline-block;background:color-mix(in srgb,var(--accent) 14%,transparent);
+  color:var(--accent);border-radius:5px;padding:1px 7px;font-size:11px;font-weight:700;margin-right:5px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin:0 0 16px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;
+  box-shadow:var(--shadow)}
+.kpi .n{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums;
+  background:linear-gradient(135deg,var(--brand2),var(--accent));-webkit-background-clip:text;
+  background-clip:text;color:transparent;line-height:1.2}
+.kpi .l{font-size:11.5px;color:var(--muted);margin-top:2px}
+
+/* Pathway */
+.qblock{margin-top:16px}
+.qblock h4{margin:0 0 8px;font-size:13px}
+.opts{display:flex;gap:8px;flex-wrap:wrap}
+.opt{border:1px solid var(--line);background:var(--panel2);color:var(--ink2);border-radius:10px;
+  padding:9px 14px;font:inherit;font-size:13px;cursor:pointer;transition:.15s}
+.opt[aria-pressed="true"]{background:var(--brand2);color:#fff;border-color:transparent}
+.step{border-left:3px solid var(--brand2);background:var(--panel2);border:1px solid var(--line);
+  border-radius:0 10px 10px 0;padding:13px 16px;margin-bottom:10px}
+.step h4{margin:0 0 6px;font-size:14px}
+.stepn{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;
+  background:var(--brand2);color:#fff;font-size:11px;font-weight:800;margin-right:8px}
+
+@media print{
+  header,footer,nav#tabs,.tools,.exwrap,.opts,input,button{display:none!important}
+  body{background:#fff;color:#000}
+  .card,.step,.src{box-shadow:none;border-color:#ccc;break-inside:avoid}
+  main{padding:0;max-width:none}
+  .view{display:none} .view.on{display:block}
+}
+
+/* ── Direction A: institutional editorial ──────────────────────────── */
+header{background:var(--navy);border-bottom:3px solid var(--accent);
+  backdrop-filter:none}
+.hwrap{height:70px;padding:0 26px}
+.mark{background:none;border:1.5px solid rgba(255,255,255,.35);border-radius:2px;
+  box-shadow:none;font-family:"IBM Plex Serif",Georgia,serif;font-weight:600;
+  letter-spacing:.5px;color:#fff}
+.brand h1{font-family:"IBM Plex Serif",Georgia,serif;font-size:19px;font-weight:600;
+  letter-spacing:.2px;color:#fff}
+.brand span{font-size:10.5px;color:#9fb0d4;letter-spacing:.07em;text-transform:uppercase;
+  margin-top:2px}
+.chip{border-radius:2px;border-color:rgba(255,255,255,.16);background:transparent;
+  color:#c3d0ea;font-size:11px}
+.chip b{color:#fff}
+.iconbtn{border-radius:2px;border-color:rgba(255,255,255,.18);background:transparent;
+  color:#c3d0ea}
+.iconbtn:hover{background:rgba(255,255,255,.08);color:#fff}
+
+nav#tabs{background:var(--panel);border-bottom:1px solid var(--line);padding:0 26px}
+.tab{padding:13px 18px;font-size:13.5px}
+.tab[aria-selected="true"]{color:var(--navy);border-bottom-color:var(--accent);font-weight:600}
+:root[data-theme="dark"] .tab[aria-selected="true"],
+:root:not([data-theme="light"]) .tab[aria-selected="true"]{color:var(--ink)}
+
+/* Squarer, print-like surfaces — gazettes are not rounded rectangles. */
+.card,.src,.step,.kpi,.col,.bar2{border-radius:3px}
+.badge{border-radius:2px;font-size:10.5px;letter-spacing:.03em}
+.ex{border-radius:2px;font-size:12.5px}
+.tool{border-radius:2px}
+.you div{border-radius:3px;background:var(--navy);
+  box-shadow:0 1px 2px rgba(15,23,42,.08)}
+input.inline,#q{border-radius:2px}
+.bar2{border-radius:3px}
+.go{border-radius:2px;background:var(--accent);box-shadow:none;font-weight:600}
+.go:hover:not(:disabled){transform:none;background:#a8370a}
+
+/* The answer card states read as a document, not a chat bubble. */
+.bot.card{border-left:3px solid var(--ok)}
+.bot.card:has(.badge.info){border-left-color:var(--info)}
+.bot.card:has(.badge.no){border-left-color:var(--warn)}
+.intro h2{font-family:"IBM Plex Serif",Georgia,serif;font-weight:600;letter-spacing:-.2px;
+  font-size:21px}
+
+/* Evidence blocks: monospaced provenance, quoted source text. */
+.src{border-left:2px solid var(--accent);border-radius:0 3px 3px 0;background:var(--panel2)}
+.sn{font-family:"IBM Plex Mono",ui-monospace,monospace;color:var(--accent);font-weight:500}
+.sl{font-family:"IBM Plex Mono",ui-monospace,monospace}
+.src blockquote{font-size:12.5px;line-height:1.65}
+.srcs h4{letter-spacing:.11em}
+.cite{border-radius:2px;font-family:"IBM Plex Mono",ui-monospace,monospace;
+  background:transparent;color:var(--accent);border-color:transparent;font-size:11px;
+  padding:0 2px;font-weight:600}
+.cite:hover{background:var(--accent);color:#fff}
+
+/* Timeline reads as a gazette record. */
+.tldate{font-family:"IBM Plex Mono",ui-monospace,monospace}
+.tlmeta{font-family:"IBM Plex Mono",ui-monospace,monospace}
+.gz{border-radius:2px;font-family:"IBM Plex Mono",ui-monospace,monospace}
+.kpi .n{font-family:"IBM Plex Serif",Georgia,serif;-webkit-text-fill-color:currentColor;
+  background:none;color:var(--navy)}
+:root[data-theme="dark"] .kpi .n,
+:root:not([data-theme="light"]) .kpi .n{color:var(--ink)}
+.rank,.rsc,.rdoc{font-family:"IBM Plex Mono",ui-monospace,monospace}
+.unverified{border-radius:0 3px 3px 0}
+
+/* Column width and header alignment.
+   nav#tabs was capped at 900px inside a full-width navy header, so its
+   background stopped mid-band and the masthead looked broken. It now spans
+   the full width with padding that keeps the tabs on the same column as the
+   content. Column widened for projector viewing. */
+.hwrap,main,.bar2,.hint{max-width:1120px}
+nav#tabs{max-width:none;margin:0;padding:0 max(20px,calc((100% - 1120px)/2))}
+
+/* Dictation: a clearly live composer, and lighter text while words are
+   still being recognised so the user can see what is settled. */
+.bar2.listening{border-color:var(--accent);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+#mic.on{background:var(--accent);color:#fff;border-color:transparent;
+  animation:micpulse 1.4s ease-in-out infinite}
+@keyframes micpulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 55%,transparent)}
+  50%{box-shadow:0 0 0 7px color-mix(in srgb,var(--accent) 0%,transparent)}}
+#q.interim{color:var(--muted);font-style:italic}
+/* A quiet footnote, not a warning banner: the distinction stays visible
+   without making a helpful answer look untrustworthy. */
+.genfoot{margin-top:14px;padding-top:11px;border-top:1px dashed var(--line);
+  font-size:11.5px;color:var(--muted)}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PREMIUM MATERIAL LAYER
+   ───────────────────────────────────────────────────────────────────────
+   Physical, not decorative. The reference is an embossed government seal
+   and letterpress on heavy stock — brass, ink and paper — rather than the
+   glossy consumer skeuomorphism of a decade ago, which would read dated on
+   a compliance tool.
+
+   One rule governs everything: light falls from the top-left. Raised
+   surfaces catch a highlight on their top edge and cast shadow below;
+   recessed ones do the exact opposite. Text areas stay flat and
+   high-contrast — depth belongs to the chrome, never under the words.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+:root{
+  --brass:#b0852f;  --brass-lo:#8a6520;  --brass-hi:#e8cd8a;
+  --ink-deep:#0b1531;
+  --paper:#faf8f3;  --paper-lo:#efeadf;
+  /* Reusable elevations, so depth stays consistent across components. */
+  --lift-1:inset 0 1px 0 rgba(255,255,255,.9), 0 1px 1px rgba(24,20,10,.06),
+           0 2px 4px rgba(24,20,10,.05);
+  --lift-2:inset 0 1px 0 rgba(255,255,255,.95), 0 1px 1px rgba(24,20,10,.05),
+           0 4px 10px rgba(24,20,10,.07), 0 12px 26px rgba(24,20,10,.06);
+  --lift-3:inset 0 1px 0 rgba(255,255,255,.95), 0 2px 3px rgba(24,20,10,.07),
+           0 10px 24px rgba(24,20,10,.09), 0 26px 50px rgba(24,20,10,.07);
+  --press:inset 0 2px 5px rgba(24,20,10,.16), inset 0 -1px 0 rgba(255,255,255,.55);
+  --engrave:inset 0 1px 3px rgba(24,20,10,.14), inset 0 -1px 0 rgba(255,255,255,.75);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --brass:#d4af5f; --brass-lo:#9b7a2e; --brass-hi:#f0dda8;
+    --ink-deep:#05080f; --paper:#1b212c; --paper-lo:#151a23;
+    --lift-1:inset 0 1px 0 rgba(255,255,255,.07), 0 1px 2px rgba(0,0,0,.5);
+    --lift-2:inset 0 1px 0 rgba(255,255,255,.08), 0 4px 12px rgba(0,0,0,.55),
+             0 14px 30px rgba(0,0,0,.4);
+    --lift-3:inset 0 1px 0 rgba(255,255,255,.09), 0 10px 26px rgba(0,0,0,.6),
+             0 28px 56px rgba(0,0,0,.45);
+    --press:inset 0 2px 6px rgba(0,0,0,.6), inset 0 -1px 0 rgba(255,255,255,.05);
+    --engrave:inset 0 1px 4px rgba(0,0,0,.55), inset 0 -1px 0 rgba(255,255,255,.06);
+  }
+}
+:root[data-theme="dark"]{
+  --brass:#d4af5f; --brass-lo:#9b7a2e; --brass-hi:#f0dda8;
+  --ink-deep:#05080f; --paper:#1b212c; --paper-lo:#151a23;
+  --lift-1:inset 0 1px 0 rgba(255,255,255,.07), 0 1px 2px rgba(0,0,0,.5);
+  --lift-2:inset 0 1px 0 rgba(255,255,255,.08), 0 4px 12px rgba(0,0,0,.55),
+           0 14px 30px rgba(0,0,0,.4);
+  --lift-3:inset 0 1px 0 rgba(255,255,255,.09), 0 10px 26px rgba(0,0,0,.6),
+           0 28px 56px rgba(0,0,0,.45);
+  --press:inset 0 2px 6px rgba(0,0,0,.6), inset 0 -1px 0 rgba(255,255,255,.05);
+  --engrave:inset 0 1px 4px rgba(0,0,0,.55), inset 0 -1px 0 rgba(255,255,255,.06);
+}
+
+/* Paper grain. A single inline SVG turbulence — no dependency, no request —
+   at very low opacity. It is what stops large light areas reading as flat
+   digital fill. */
+body{
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E"),
+    radial-gradient(1200px 700px at 22% -12%, rgba(255,255,255,.85), transparent 62%);
+  background-attachment: fixed, fixed;
+}
+:root[data-theme="dark"] body,
+:root:not([data-theme="light"]) body{
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E"),
+    radial-gradient(1200px 700px at 22% -12%, rgba(120,150,220,.10), transparent 62%);
+}
+
+/* ── Masthead: a milled metal fascia with a brass parting line ───────── */
+header{
+  background:
+    linear-gradient(180deg, #1b2b52 0%, var(--navy) 46%, var(--ink-deep) 100%);
+  border-bottom:0;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.14),
+    inset 0 -1px 0 rgba(0,0,0,.5),
+    0 1px 0 var(--brass-lo),
+    0 2px 0 rgba(184,134,47,.35),
+    0 10px 28px rgba(11,21,49,.30);
+  backdrop-filter:none;
+}
+.mark{
+  background:linear-gradient(160deg, var(--brass-hi) 0%, var(--brass) 42%, var(--brass-lo) 100%);
+  border:0; color:#2a1f08;
+  text-shadow:0 1px 0 rgba(255,255,255,.45);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.75),
+    inset 0 -2px 3px rgba(80,55,10,.5),
+    0 2px 4px rgba(0,0,0,.4), 0 6px 14px rgba(0,0,0,.32);
+}
+.brand h1{ text-shadow:0 1px 0 rgba(0,0,0,.55); }
+.brand span{ color:#a9bce0; text-shadow:0 1px 0 rgba(0,0,0,.45); }
+
+/* Header buttons: small machined keys. */
+.iconbtn{
+  background:linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.04));
+  border:1px solid rgba(255,255,255,.16); color:#dbe4f6;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.2), 0 2px 4px rgba(0,0,0,.35);
+  transition:transform .08s ease, box-shadow .12s ease, background .12s ease;
+}
+.iconbtn:hover{
+  background:linear-gradient(180deg, rgba(255,255,255,.26), rgba(255,255,255,.08));
+  color:#fff;
+}
+.iconbtn:active{
+  transform:translateY(1px);
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.5);
+}
+
+/* ── Tabs: physical file tabs. The active one rises to meet the page. ── */
+nav#tabs{
+  background:linear-gradient(180deg, var(--paper-lo), var(--panel));
+  border-bottom:1px solid rgba(24,20,10,.14);
+  box-shadow:inset 0 6px 10px -8px rgba(11,21,49,.55);
+  gap:4px;
+}
+.tab{
+  position:relative; border-bottom:0; margin-top:5px;
+  border-radius:6px 6px 0 0;
+  background:linear-gradient(180deg, rgba(255,255,255,.35), rgba(0,0,0,.03));
+  box-shadow:inset 0 -3px 6px -3px rgba(24,20,10,.18);
+  transition:transform .12s ease, box-shadow .12s ease, color .12s ease;
+}
+.tab:hover{ transform:translateY(-1px); }
+.tab[aria-selected="true"]{
+  background:linear-gradient(180deg, #fff, var(--panel));
+  transform:translateY(-2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,1),
+    0 -2px 6px rgba(24,20,10,.08),
+    -1px 0 0 rgba(24,20,10,.08), 1px 0 0 rgba(24,20,10,.08);
+}
+/* Brass underline on the active tab, sitting proud of the surface. */
+.tab[aria-selected="true"]::after{
+  content:""; position:absolute; left:10px; right:10px; bottom:0; height:3px;
+  border-radius:2px;
+  background:linear-gradient(90deg, var(--brass-lo), var(--brass-hi), var(--brass-lo));
+  box-shadow:0 1px 2px rgba(140,100,30,.5);
+}
+
+/* ── Paper surfaces ─────────────────────────────────────────────────── */
+.card{
+  background:linear-gradient(180deg, #fff 0%, var(--paper) 100%);
+  border:1px solid rgba(24,20,10,.13);
+  box-shadow:var(--lift-2);
+}
+:root[data-theme="dark"] .card,
+:root:not([data-theme="light"]) .card{
+  background:linear-gradient(180deg, var(--paper) 0%, var(--paper-lo) 100%);
+  border-color:rgba(255,255,255,.07);
+}
+.intro h2{ text-shadow:0 1px 0 rgba(255,255,255,.9); }
+:root[data-theme="dark"] .intro h2,
+:root:not([data-theme="light"]) .intro h2{ text-shadow:0 1px 0 rgba(0,0,0,.6); }
+
+/* The answer sheet sits highest, with a debossed verification edge. */
+.bot.card{
+  box-shadow:var(--lift-3);
+  border-left-width:4px;
+  position:relative;
+}
+.bot.card::before{
+  content:""; position:absolute; left:-4px; top:0; bottom:0; width:4px;
+  background:linear-gradient(180deg, rgba(255,255,255,.5), rgba(0,0,0,.22));
+  pointer-events:none;
+}
+
+/* Suggestion chips: pressable keys. */
+.ex{
+  background:linear-gradient(180deg, #fff, var(--paper-lo));
+  border:1px solid rgba(24,20,10,.15);
+  box-shadow:var(--lift-1);
+  transition:transform .1s ease, box-shadow .12s ease, border-color .12s ease;
+}
+.ex:hover{ transform:translateY(-1.5px); box-shadow:var(--lift-2);
+  border-color:color-mix(in srgb, var(--brass) 55%, transparent); }
+.ex:active{ transform:translateY(1px); box-shadow:var(--press); }
+
+/* ── The question, stamped into navy ────────────────────────────────── */
+.you div{
+  background:linear-gradient(170deg, #24365f 0%, var(--navy) 55%, var(--ink-deep) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.16),
+    inset 0 -2px 4px rgba(0,0,0,.4),
+    0 3px 6px rgba(11,21,49,.28), 0 12px 26px rgba(11,21,49,.22);
+  text-shadow:0 1px 0 rgba(0,0,0,.4);
+}
+
+/* ── Badges: engraved plates ────────────────────────────────────────── */
+.badge{
+  background:linear-gradient(180deg, #fff, var(--paper-lo));
+  box-shadow:var(--lift-1);
+  text-shadow:0 1px 0 rgba(255,255,255,.8);
+}
+.badge.ok{
+  background:linear-gradient(180deg, #f2fbf6, #dff2e7);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9), 0 1px 2px rgba(4,120,87,.18);
+}
+.badge.no{ background:linear-gradient(180deg, #fffaf0, #fdf0d8); }
+.badge.info{ background:linear-gradient(180deg, #f4fbff, #e2f1fb); }
+:root[data-theme="dark"] .badge,
+:root:not([data-theme="light"]) .badge{ text-shadow:0 1px 0 rgba(0,0,0,.5); }
+
+/* Citation markers read as tiny brass studs. */
+.cite{
+  background:linear-gradient(180deg, rgba(176,133,47,.16), rgba(176,133,47,.07));
+  border:1px solid rgba(176,133,47,.4);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7), 0 1px 1px rgba(24,20,10,.1);
+  border-radius:4px; padding:1px 6px;
+}
+.cite:hover{
+  background:linear-gradient(180deg, var(--brass), var(--brass-lo));
+  color:#fff; text-shadow:0 1px 0 rgba(0,0,0,.35);
+}
+
+/* ── Evidence: stacked sheets, brass-tabbed ─────────────────────────── */
+.src{
+  background:linear-gradient(180deg, #fff, var(--paper));
+  border:1px solid rgba(24,20,10,.12);
+  border-left:3px solid var(--brass);
+  box-shadow:var(--lift-1);
+  transition:transform .12s ease, box-shadow .14s ease;
+}
+.src:hover{ transform:translateX(2px); box-shadow:var(--lift-2); }
+.src blockquote{
+  background:linear-gradient(180deg, var(--paper-lo), #fff);
+  box-shadow:var(--engrave); border-color:rgba(24,20,10,.1);
+}
+:root[data-theme="dark"] .src,
+:root:not([data-theme="light"]) .src{
+  background:linear-gradient(180deg, var(--paper), var(--paper-lo));
+  border-color:rgba(255,255,255,.06);
+}
+.sn{ text-shadow:0 1px 0 rgba(255,255,255,.7); }
+
+/* ── Action buttons ─────────────────────────────────────────────────── */
+.tool{
+  background:linear-gradient(180deg, #fff, var(--paper-lo));
+  border:1px solid rgba(24,20,10,.16);
+  box-shadow:var(--lift-1);
+  transition:transform .1s ease, box-shadow .12s ease;
+}
+.tool:hover{ transform:translateY(-1px); box-shadow:var(--lift-2); }
+.tool:active{ transform:translateY(1px); box-shadow:var(--press); }
+.tool[aria-pressed="true"]{
+  background:linear-gradient(180deg, var(--brass-lo), var(--brass));
+  color:#fff; border-color:var(--brass-lo);
+  box-shadow:var(--press); text-shadow:0 1px 0 rgba(0,0,0,.3);
+}
+
+/* ── Composer: a brass-trimmed console tray ─────────────────────────── */
+footer{ background:linear-gradient(to top, var(--bg) 58%, transparent); }
+.bar2{
+  background:linear-gradient(180deg, var(--paper-lo), #fff);
+  border:1px solid rgba(24,20,10,.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.95),
+    0 2px 4px rgba(24,20,10,.07),
+    0 12px 28px rgba(24,20,10,.11),
+    0 30px 60px rgba(24,20,10,.07);
+}
+.bar2:focus-within{
+  border-color:color-mix(in srgb, var(--brass) 65%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.95),
+    0 0 0 3px rgba(176,133,47,.18),
+    0 12px 28px rgba(24,20,10,.13);
+}
+/* The field itself is milled into the tray. */
+#q, input.inline{
+  background:linear-gradient(180deg, rgba(24,20,10,.05), rgba(255,255,255,.5));
+  border:1px solid rgba(24,20,10,.13);
+  box-shadow:var(--engrave);
+  border-radius:5px; padding:9px 12px;
+}
+:root[data-theme="dark"] #q, :root[data-theme="dark"] input.inline,
+:root:not([data-theme="light"]) #q, :root:not([data-theme="light"]) input.inline{
+  background:linear-gradient(180deg, rgba(0,0,0,.35), rgba(255,255,255,.03));
+  border-color:rgba(255,255,255,.08);
+}
+
+/* The primary action: a solid brass key. */
+.go{
+  background:linear-gradient(180deg, #d8a341 0%, var(--brass) 45%, var(--brass-lo) 100%);
+  color:#221805; border:1px solid var(--brass-lo);
+  text-shadow:0 1px 0 rgba(255,255,255,.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.7),
+    inset 0 -2px 4px rgba(90,62,12,.45),
+    0 2px 3px rgba(24,20,10,.2), 0 8px 18px rgba(140,100,30,.28);
+  transition:transform .09s ease, box-shadow .12s ease, filter .12s ease;
+}
+.go:hover:not(:disabled){ transform:translateY(-1px); filter:brightness(1.05);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.75), inset 0 -2px 4px rgba(90,62,12,.45),
+             0 4px 6px rgba(24,20,10,.22), 0 12px 26px rgba(140,100,30,.34); }
+.go:active:not(:disabled){ transform:translateY(1.5px);
+  box-shadow:inset 0 3px 7px rgba(80,55,10,.6), inset 0 -1px 0 rgba(255,255,255,.3); }
+
+#mic{
+  background:linear-gradient(180deg, #fff, var(--paper-lo));
+  border:1px solid rgba(24,20,10,.16); color:var(--ink2);
+  box-shadow:var(--lift-1);
+}
+#mic:active{ transform:translateY(1px); box-shadow:var(--press); }
+#mic.on{
+  background:linear-gradient(180deg, #d8552a, var(--accent));
+  border-color:transparent; color:#fff;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.4), 0 0 0 3px rgba(194,65,12,.2),
+             0 4px 10px rgba(194,65,12,.4);
+}
+
+/* ── Data surfaces ──────────────────────────────────────────────────── */
+.kpi{
+  background:linear-gradient(180deg, #fff, var(--paper));
+  border:1px solid rgba(24,20,10,.13);
+  box-shadow:var(--lift-2);
+}
+.kpi .n{ text-shadow:0 1px 0 rgba(255,255,255,.9); }
+:root[data-theme="dark"] .kpi .n,
+:root:not([data-theme="light"]) .kpi .n{ text-shadow:0 1px 0 rgba(0,0,0,.6); }
+
+/* Timeline markers become physical studs on a milled rail. */
+.tl::before{
+  background:linear-gradient(180deg, rgba(24,20,10,.05), rgba(24,20,10,.16), rgba(24,20,10,.05));
+  width:3px; border-radius:2px;
+  box-shadow:inset 0 0 1px rgba(255,255,255,.6);
+}
+.tlitem::before{
+  background:radial-gradient(circle at 33% 28%, #fff 0%, var(--brass) 42%, var(--brass-lo) 100%);
+  box-shadow:0 1px 3px rgba(24,20,10,.4), inset 0 -1px 2px rgba(90,62,12,.5);
+  border:0;
+}
+.tlitem.orig::before{
+  background:radial-gradient(circle at 33% 28%, #d7f5e6 0%, #12a06e 45%, #04624a 100%);
+}
+.gz{
+  background:linear-gradient(180deg, rgba(176,133,47,.16), rgba(176,133,47,.06));
+  border:1px solid rgba(176,133,47,.38);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.6);
+}
+.step, .col, .opt{
+  background:linear-gradient(180deg, #fff, var(--paper));
+  box-shadow:var(--lift-1);
+}
+.opt{ border:1px solid rgba(24,20,10,.15); transition:transform .1s ease, box-shadow .12s ease; }
+.opt:hover{ transform:translateY(-1px); box-shadow:var(--lift-2); }
+.opt[aria-pressed="true"]{
+  background:linear-gradient(180deg, #23355e, var(--navy));
+  color:#fff; border-color:var(--ink-deep);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14), inset 0 -2px 4px rgba(0,0,0,.4);
+  text-shadow:0 1px 0 rgba(0,0,0,.4);
+}
+.stepn{
+  background:linear-gradient(180deg, var(--brass), var(--brass-lo));
+  color:#221805; text-shadow:0 1px 0 rgba(255,255,255,.3);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55), 0 1px 2px rgba(24,20,10,.3);
+}
+
+/* Notes and footnotes sit slightly recessed. */
+.unverified, .genfoot, .note{
+  background:linear-gradient(180deg, var(--paper-lo), #fff);
+  box-shadow:var(--engrave);
+  border-radius:0 6px 6px 0; padding:11px 15px;
+}
+.genfoot{ border-left:3px solid rgba(24,20,10,.14); margin-top:16px; }
+:root[data-theme="dark"] .unverified, :root[data-theme="dark"] .genfoot,
+:root:not([data-theme="light"]) .unverified, :root:not([data-theme="light"]) .genfoot{
+  background:linear-gradient(180deg, var(--paper-lo), var(--paper));
+}
+
+.toast{
+  background:linear-gradient(180deg, #23355e, var(--ink-deep));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 10px 30px rgba(11,21,49,.45);
+}
+
+/* Motion: only where it clarifies that something arrived. */
+@keyframes sheet-in{
+  from{ opacity:0; transform:translateY(10px) scale(.995); }
+  to{ opacity:1; transform:none; }
+}
+.msg.bot{ animation:sheet-in .3s cubic-bezier(.22,.61,.36,1) both; }
+@media (prefers-reduced-motion: reduce){
+  .msg.bot{ animation:none; }
+  .tab, .ex, .tool, .go, .src, .opt{ transition:none; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PREMIUM 3D DARK  —  visual layer only
+   ───────────────────────────────────────────────────────────────────────
+   Depth comes from light behaviour, not from borders or heavy drop
+   shadows: each surface sits one elevation step lighter than the one
+   beneath it, catches a 1px highlight on its top edge, and casts a single
+   soft ambient shadow downward. Light source is fixed at top-centre and
+   nothing contradicts it.
+
+   Only transform and opacity are animated. Shadows, filters and geometry
+   are never transitioned, so the message list stays smooth while a
+   response streams in.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+:root{
+  /* Canvas and elevation ladder — this ladder IS the 3D. */
+  --c-canvas:#080A0F;
+  --e1:#0D1017;  --e2:#12161F;  --e3:#181D28;  --e4:#1F2532;
+
+  /* Hairlines. Never a solid bright border. */
+  --line-1:rgba(255,255,255,.06);
+  --line-2:rgba(255,255,255,.12);
+
+  /* Brand gold, used as a gradient — never a flat fill. */
+  --gold:#E3B341;  --gold-hi:#F5D078;  --gold-lo:#A67C1A;
+  --gold-grad:linear-gradient(180deg, var(--gold-hi) 0%, var(--gold) 46%, var(--gold-lo) 100%);
+  --gold-glow:rgba(227,179,65,.28);
+
+  /* Text */
+  --t-1:#F2F4F8;
+  --t-2:rgba(242,244,248,.66);
+  --t-3:rgba(242,244,248,.42);
+
+  /* Semantic */
+  --s-ok:#3DDC97;  --s-info:#7AA2F7;  --s-warn:#E3B341;
+
+  /* Depth primitives */
+  --hi-top:inset 0 1px 0 rgba(255,255,255,.07);
+  --sheen:linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,0));
+  --amb:0 8px 24px rgba(0,0,0,.45);
+  --amb-lg:0 16px 44px rgba(0,0,0,.55);
+
+  /* Radii — 8 chips / 14 cards+inputs / 20 large panels. */
+  --r-chip:8px;  --r-card:14px;  --r-panel:20px;
+
+  --ease:cubic-bezier(.4,0,.2,1);
+  --dur:180ms;
+
+  /* Aliases so existing rules resolve to the new system. */
+  --bg:var(--c-canvas);   --bg2:var(--e1);
+  --panel:var(--e2);      --panel2:var(--e3);
+  --ink:var(--t-1);       --ink2:var(--t-2);   --muted:var(--t-3);
+  --line:var(--line-1);   --navy:var(--e1);    --ink-deep:var(--c-canvas);
+  --brand:var(--gold);    --brand2:var(--gold); --accent:var(--gold);
+  --ok:var(--s-ok);       --info:var(--s-info); --warn:var(--s-warn);
+  --okbg:rgba(61,220,151,.10); --infobg:rgba(122,162,247,.10);
+  --warnbg:rgba(227,179,65,.10);
+  --code:var(--e3);       --shadow:var(--amb);
+  --paper:var(--e2);      --paper-lo:var(--e1);
+  --brass:var(--gold);    --brass-hi:var(--gold-hi); --brass-lo:var(--gold-lo);
+}
+
+/* Light theme still resolves — the ladder inverts, tokens keep their roles. */
+:root[data-theme="light"]{
+  --c-canvas:#F4F5F8;
+  --e1:#FFFFFF; --e2:#FFFFFF; --e3:#F7F8FA; --e4:#EEF0F4;
+  --line-1:rgba(10,14,25,.09); --line-2:rgba(10,14,25,.18);
+  --t-1:#0C1017; --t-2:rgba(12,16,23,.70); --t-3:rgba(12,16,23,.48);
+  --gold:#A67C1A; --gold-hi:#E3B341; --gold-lo:#7A5A10;
+  --hi-top:inset 0 1px 0 rgba(255,255,255,.9);
+  --sheen:linear-gradient(180deg, rgba(255,255,255,.7), rgba(255,255,255,0));
+  --amb:0 6px 18px rgba(12,16,23,.10);
+  --amb-lg:0 14px 36px rgba(12,16,23,.12);
+  --okbg:rgba(4,120,87,.10); --infobg:rgba(3,105,161,.10);
+  --warnbg:rgba(180,83,9,.10);
+}
+
+/* ── Canvas ─────────────────────────────────────────────────────────── */
+body{
+  background:
+    radial-gradient(900px 520px at 50% -220px, rgba(227,179,65,.055), transparent 70%),
+    var(--c-canvas);
+  background-attachment:fixed;
+  color:var(--t-1);
+  font:15px/1.6 -apple-system,"Segoe UI",Inter,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{ background:rgba(227,179,65,.26); color:var(--t-1); }
+*{ scrollbar-width:thin; scrollbar-color:rgba(255,255,255,.14) transparent; }
+::-webkit-scrollbar{ width:9px; height:9px; }
+::-webkit-scrollbar-track{ background:transparent; }
+::-webkit-scrollbar-thumb{
+  background:rgba(255,255,255,.13); border-radius:6px;
+  border:2px solid transparent; background-clip:content-box;
+}
+::-webkit-scrollbar-thumb:hover{ background:rgba(255,255,255,.22); background-clip:content-box; }
+:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; border-radius:6px; }
+
+/* ── 1. Header ──────────────────────────────────────────────────────── */
+header{
+  position:sticky; top:0; z-index:40;
+  background:var(--e1);
+  border-bottom:1px solid var(--line-1);
+  box-shadow:0 1px 0 rgba(227,179,65,.13), 0 6px 20px rgba(0,0,0,.4);
+  backdrop-filter:none;
+}
+.hwrap{ height:58px; padding:0 22px; }
+.mark{
+  width:34px; height:34px; border-radius:10px; border:0;
+  background:var(--gold-grad); color:#1A1204;
+  font-weight:700; font-size:13.5px; letter-spacing:.3px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5), 0 4px 12px rgba(227,179,65,.22);
+  text-shadow:none;
+}
+.brand h1{ font-size:16px; font-weight:600; letter-spacing:-.15px; color:var(--t-1);
+  text-shadow:none; }
+.brand span{ font-size:11px; font-weight:500; letter-spacing:.09em; text-transform:uppercase;
+  color:var(--t-3); text-shadow:none; }
+
+.iconbtn{
+  height:32px; min-width:32px; border-radius:var(--r-chip);
+  background:var(--e3); border:1px solid var(--line-1); color:var(--t-2);
+  background-image:var(--sheen);
+  box-shadow:var(--hi-top);
+  transition:transform var(--dur) var(--ease), opacity var(--dur) var(--ease);
+}
+.iconbtn:hover{ transform:translateY(-1px); border-color:var(--line-2); color:var(--t-1); }
+.iconbtn:active{ transform:translateY(0); }
+
+/* ── 2. Tabs: segmented control on a recessed track ─────────────────── */
+nav#tabs{
+  background:var(--c-canvas);
+  border-bottom:1px solid var(--line-1);
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.4);
+  padding:7px 22px; gap:4px;
+}
+.tab{
+  position:relative; border:0; border-radius:var(--r-chip);
+  padding:8px 15px; margin:0; background:transparent;
+  color:var(--t-3); font-size:13px; font-weight:500;
+  box-shadow:none;
+  transition:transform var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+.tab::after{ content:none; }
+.tab:hover{ color:var(--t-2); transform:none; }
+.tab[aria-selected="true"]{
+  color:var(--t-1); font-weight:600;
+  background:var(--e3); background-image:var(--sheen);
+  border:0;
+  box-shadow:var(--hi-top), 0 2px 8px rgba(0,0,0,.4);
+  transform:none;
+}
+.tab[aria-selected="true"]::before{
+  content:""; position:absolute; left:12px; right:12px; bottom:-1px; height:2px;
+  border-radius:2px; background:var(--gold-grad);
+  box-shadow:0 0 8px rgba(227,179,65,.5);
+}
+
+/* ── 3. Panels and the hero card ────────────────────────────────────── */
+main{ padding:26px 22px 168px; }
+.card{
+  position:relative;
+  background:var(--e2); background-image:var(--sheen);
+  border:1px solid var(--line-1); border-radius:var(--r-panel);
+  box-shadow:var(--hi-top), var(--amb);
+}
+.intro{ padding:30px 30px 26px; overflow:hidden; }
+/* Faint gold bleed from the top-left corner. */
+.intro::before{
+  content:""; position:absolute; inset:0; pointer-events:none; border-radius:inherit;
+  background:radial-gradient(520px 300px at 0% 0%, rgba(227,179,65,.04), transparent 68%);
+}
+.intro h2{
+  position:relative; font-size:30px; line-height:1.2; font-weight:650;
+  letter-spacing:-.6px; color:var(--t-1); margin:0 0 12px; text-shadow:none;
+}
+.intro p{ position:relative; font-size:15px; line-height:1.65; color:var(--t-2); margin:0 0 8px; }
+
+/* ── 4. Suggestion chips ────────────────────────────────────────────── */
+.exwrap{ margin-top:20px; gap:9px; }
+.ex{
+  position:relative;
+  background:var(--e3); background-image:var(--sheen);
+  border:1px solid var(--line-1); border-radius:var(--r-chip);
+  padding:9px 15px; font-size:13px; font-weight:500; color:var(--t-2);
+  box-shadow:var(--hi-top);
+  transition:transform var(--dur) var(--ease), color var(--dur) var(--ease),
+             border-color var(--dur) var(--ease);
+}
+.ex:hover{
+  transform:translateY(-2px); color:var(--t-1);
+  border-color:rgba(227,179,65,.35);
+}
+.ex:active{ transform:translateY(0); }
+
+/* ── 5. Composer ────────────────────────────────────────────────────── */
+footer{ background:linear-gradient(to top, var(--c-canvas) 62%, transparent); padding:16px 22px 20px; }
+.bar2{
+  position:relative;
+  background:var(--e2); background-image:var(--sheen);
+  border:1px solid var(--line-1); border-radius:var(--r-panel);
+  padding:10px 10px 10px 8px; gap:8px;
+  box-shadow:var(--hi-top), var(--amb-lg);
+}
+/* Focus ring drawn as a pseudo-element so no shadow is transitioned. */
+.bar2::after{
+  content:""; position:absolute; inset:-1px; border-radius:inherit; pointer-events:none;
+  padding:1px; opacity:0;
+  background:linear-gradient(180deg, rgba(245,208,120,.9), rgba(166,124,26,.35));
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude;
+  transition:opacity var(--dur) var(--ease);
+}
+.bar2:focus-within::after{ opacity:1; }
+.bar2:focus-within{ border-color:transparent; }
+
+#q, input.inline{
+  background:var(--e1); background-image:none;
+  border:1px solid transparent; border-radius:var(--r-card);
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.45);
+  color:var(--t-1); font-size:15px; padding:11px 14px;
+}
+#q::placeholder, input.inline::placeholder{ color:var(--t-3); }
+#q.interim{ color:var(--t-2); font-style:italic; }
+
+#mic{
+  width:36px; height:36px; border-radius:50%;
+  background:transparent; border:1px solid var(--line-1); color:var(--t-2);
+  box-shadow:none;
+  transition:transform var(--dur) var(--ease), color var(--dur) var(--ease),
+             border-color var(--dur) var(--ease);
+}
+#mic:hover{ border-color:var(--line-2); color:var(--t-1); }
+#mic:active{ transform:translateY(1px); }
+#mic.on{
+  background:var(--gold-grad); border-color:transparent; color:#1A1204;
+  box-shadow:0 4px 14px var(--gold-glow);
+  animation:micpulse 1.6s var(--ease) infinite;
+}
+@keyframes micpulse{ 0%,100%{ opacity:1 } 50%{ opacity:.72 } }
+.bar2.listening{ border-color:rgba(227,179,65,.35); }
+
+.go{
+  border:0; border-radius:999px; padding:11px 22px;
+  background:var(--gold-grad); color:#1A1204;
+  font-size:13.5px; font-weight:650; letter-spacing:.01em;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.45), 0 4px 14px var(--gold-glow);
+  text-shadow:none;
+  transition:transform var(--dur) var(--ease), opacity var(--dur) var(--ease);
+}
+.go:hover:not(:disabled){ transform:translateY(-1px); }
+.go:active:not(:disabled){ transform:translateY(1px); }
+.go:disabled{ opacity:.45; transform:none; }
+.hint{ color:var(--t-3); font-size:11px; margin-top:10px; }
+
+/* ── 6. Messages ────────────────────────────────────────────────────── */
+.msg{ margin:20px 0; animation:none; }
+.you div{
+  background:var(--e3); background-image:var(--sheen);
+  border:1px solid var(--line-1); border-radius:var(--r-card);
+  color:var(--t-1); padding:12px 16px; max-width:76%;
+  box-shadow:var(--hi-top);
+  text-shadow:none;
+}
+/* Assistant reply is a flat surface, separated by a hairline — no bubble,
+   and no per-message shadow (it would repeat down the whole list). */
+.bot.card{
+  background:transparent; background-image:none;
+  border:0; border-top:1px solid var(--line-1);
+  border-left:2px solid var(--line-2);
+  border-radius:0; box-shadow:none;
+  padding:20px 0 20px 20px;
+}
+.bot.card::before{ content:none; }
+.bot.card:has(.badge.ok){ border-left-color:var(--s-ok); }
+.bot.card:has(.badge.info){ border-left-color:var(--s-info); }
+.bot.card:has(.badge.no){ border-left-color:var(--s-warn); }
+
+.answer{ font-size:15px; line-height:1.65; color:var(--t-1); }
+.answer strong{ font-weight:640; color:var(--t-1); }
+.answer code{
+  background:var(--e3); border:1px solid var(--line-1); border-radius:6px;
+  padding:1px 6px; font-size:12.5px; color:var(--t-2);
+  font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+.badge{
+  background:var(--e3); border:1px solid var(--line-1); border-radius:6px;
+  color:var(--t-2); font-size:11px; font-weight:600; padding:4px 9px;
+  box-shadow:none; text-shadow:none;
+}
+.badge.ok{ color:var(--s-ok); border-color:rgba(61,220,151,.28); background:var(--okbg); }
+.badge.info{ color:var(--s-info); border-color:rgba(122,162,247,.28); background:var(--infobg); }
+.badge.no{ color:var(--s-warn); border-color:rgba(227,179,65,.28); background:var(--warnbg); }
+
+.cite{
+  background:rgba(227,179,65,.12); border:1px solid rgba(227,179,65,.26);
+  border-radius:5px; padding:1px 6px; color:var(--gold);
+  font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  font-size:11px; font-weight:600; box-shadow:none;
+  transition:opacity var(--dur) var(--ease);
+}
+.cite:hover{ background:rgba(227,179,65,.22); color:var(--gold-hi); }
+
+.tools{ margin-top:18px; gap:8px; }
+.tool{
+  background:var(--e3); background-image:var(--sheen);
+  border:1px solid var(--line-1); border-radius:var(--r-chip);
+  color:var(--t-2); padding:7px 13px; font-size:12px; font-weight:550;
+  box-shadow:var(--hi-top);
+  transition:transform var(--dur) var(--ease), color var(--dur) var(--ease),
+             border-color var(--dur) var(--ease);
+}
+.tool:hover{ transform:translateY(-1px); color:var(--t-1); border-color:var(--line-2); }
+.tool:active{ transform:translateY(0); }
+.tool[aria-pressed="true"]{
+  background:var(--gold-grad); color:#1A1204; border-color:transparent;
+  box-shadow:0 4px 14px var(--gold-glow); text-shadow:none;
+}
+
+/* Evidence */
+.srcs{ margin-top:22px; border-top:1px solid var(--line-1); padding-top:18px; }
+.srcs h4{ color:var(--t-3); letter-spacing:.1em; font-size:10.5px; }
+.src{
+  background:var(--e2); background-image:none;
+  border:1px solid var(--line-1); border-left:2px solid rgba(227,179,65,.5);
+  border-radius:0 var(--r-chip) var(--r-chip) 0;
+  box-shadow:none; padding:13px 16px;
+  transition:transform var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.src:hover{ transform:translateX(2px); border-color:var(--line-2);
+  border-left-color:var(--gold); }
+.src.flash{ border-left-color:var(--gold-hi); }
+.sn{ color:var(--gold); font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  font-weight:600; font-size:11.5px; text-shadow:none; }
+.st{ color:var(--t-1); font-weight:600; font-size:13.5px; }
+.sl{ color:var(--t-3); font-size:11px;
+  font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; }
+.src summary{ color:var(--gold); font-size:12px; font-weight:550; }
+.src blockquote{
+  background:var(--e1); border:1px solid var(--line-1); border-radius:var(--r-chip);
+  color:var(--t-2); box-shadow:none; font-size:12.5px; line-height:1.65;
+}
+.followups{ border-top:1px solid var(--line-1); margin-top:18px; padding-top:14px; }
+.followups h5{ color:var(--t-3); letter-spacing:.09em; }
+
+.unverified,.genfoot,.note{
+  background:var(--e2); border:1px solid var(--line-1);
+  border-left:2px solid var(--s-info);
+  border-radius:0 var(--r-chip) var(--r-chip) 0;
+  box-shadow:none; color:var(--t-2); padding:12px 16px;
+}
+.genfoot{ border-left-color:var(--line-2); color:var(--t-3); font-size:11.5px;
+  background:transparent; border:0; border-top:1px solid var(--line-1);
+  border-radius:0; padding:12px 0 0; margin-top:18px; }
+
+/* ── 7. Data surfaces ───────────────────────────────────────────────── */
+.kpi{
+  background:var(--e2); background-image:var(--sheen);
+  border:1px solid var(--line-1); border-radius:var(--r-card);
+  box-shadow:var(--hi-top), var(--amb);
+}
+.kpi .n{
+  font-size:27px; font-weight:680; letter-spacing:-.8px; color:var(--t-1);
+  background:none; -webkit-text-fill-color:currentColor; text-shadow:none;
+}
+.kpi .l{ color:var(--t-3); font-size:11px; }
+.tl::before{ background:var(--line-1); width:2px; box-shadow:none; }
+.tlitem::before{
+  background:var(--gold-grad); border:2px solid var(--c-canvas);
+  box-shadow:0 0 0 1px rgba(227,179,65,.3);
+}
+.tlitem.orig::before{ background:linear-gradient(180deg,#7BF0C0,var(--s-ok)); }
+.tlitem.undated::before{ background:var(--line-2); box-shadow:none; }
+.tldate{ color:var(--t-1); font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; }
+.tlkind{ color:var(--t-3); }
+.tlmeta{ color:var(--t-3); font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; }
+.gz{
+  background:rgba(227,179,65,.12); border:1px solid rgba(227,179,65,.26);
+  color:var(--gold); border-radius:6px; box-shadow:none;
+  font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+.step,.col{
+  background:var(--e2); background-image:var(--sheen);
+  border:1px solid var(--line-1); border-radius:var(--r-card);
+  box-shadow:var(--hi-top);
+}
+.step{ border-left:2px solid rgba(227,179,65,.5); border-radius:0 var(--r-card) var(--r-card) 0; }
+.stepn{ background:var(--gold-grad); color:#1A1204; box-shadow:none; text-shadow:none; }
+.opt{
+  background:var(--e3); background-image:var(--sheen);
+  border:1px solid var(--line-1); border-radius:var(--r-chip);
+  color:var(--t-2); box-shadow:var(--hi-top);
+  transition:transform var(--dur) var(--ease), color var(--dur) var(--ease),
+             border-color var(--dur) var(--ease);
+}
+.opt:hover{ transform:translateY(-2px); color:var(--t-1); border-color:var(--line-2); }
+.opt[aria-pressed="true"]{
+  background:var(--gold-grad); color:#1A1204; border-color:transparent;
+  box-shadow:0 4px 14px var(--gold-glow); text-shadow:none;
+}
+.colh{ background:var(--e1); border-bottom:1px solid var(--line-1); }
+.rows .row{ background:var(--e1); border:1px solid transparent; }
+.row.shared{ background:rgba(61,220,151,.08); border-color:rgba(61,220,151,.22); }
+.row.uniq{ background:rgba(227,179,65,.08); border-color:rgba(227,179,65,.22); }
+table th{ color:var(--t-3); }
+table td,table th{ border-bottom:1px solid var(--line-1); }
+.bar{ background:var(--e1); }
+.empty{ color:var(--t-3); }
+.chip{ background:var(--e3); border:1px solid var(--line-1); color:var(--t-2); }
+.chip b{ color:var(--t-1); }
+
+.toast{
+  background:var(--e4); border:1px solid var(--line-1); color:var(--t-1);
+  border-radius:var(--r-chip); box-shadow:var(--amb);
+}
+.sp{ border-color:var(--line-2); border-top-color:var(--gold); }
+.load{ color:var(--t-3); }
+.ptime{ color:var(--t-3); }
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{ transition:none !important; animation:none !important; }
+}
+
+
+/* Performance guard: several older rules used the shorthand `transition:.15s`,
+   which resolves to `transition-property: all` and therefore animates
+   box-shadow, background and geometry. Those are exactly the properties that
+   cause jank while a response streams into the message list, so every
+   interactive surface is pinned to compositor-friendly properties only. */
+.iconbtn,.ex,.tool,.src,.tab,.opt,.go,#mic,.card,.bar2,.chip,.cite,.you div,
+.badge,.kpi,.step,.col,.row,.toast{
+  transition-property:transform,opacity,color,border-color !important;
+  transition-duration:var(--dur) !important;
+  transition-timing-function:var(--ease) !important;
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{ transition:none !important; animation:none !important; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   REFINEMENT PASS
+   Richer light, not more ornament. Everything added here is either a
+   gradient (free) or a compositor-only transform/opacity animation, so the
+   performance budget still holds.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Ambient light. Two fixed, very low-opacity pools plus one slow-drifting
+   orb on its own layer — the drift is a transform, so it never repaints. */
+body::before{
+  content:""; position:fixed; inset:-30vmax; z-index:-2; pointer-events:none;
+  background:
+    radial-gradient(38vmax 30vmax at 24% 12%, rgba(227,179,65,.085), transparent 62%),
+    radial-gradient(42vmax 34vmax at 82% 4%,  rgba(122,162,247,.075), transparent 66%),
+    radial-gradient(36vmax 30vmax at 62% 92%, rgba(61,220,151,.045), transparent 64%);
+  filter:blur(24px);
+  animation:drift 34s ease-in-out infinite alternate;
+  will-change:transform;
+}
+@keyframes drift{
+  from{ transform:translate3d(-2.2%, -1.4%, 0) scale(1); }
+  to  { transform:translate3d( 2.2%,  1.8%, 0) scale(1.06); }
+}
+/* A fine vignette keeps the centre bright and the edges calm. */
+body::after{
+  content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background:radial-gradient(120% 85% at 50% 0%, transparent 52%, rgba(0,0,0,.55) 100%);
+}
+:root[data-theme="light"] body::before{
+  background:
+    radial-gradient(38vmax 30vmax at 24% 12%, rgba(227,179,65,.16), transparent 62%),
+    radial-gradient(42vmax 34vmax at 82% 4%,  rgba(122,162,247,.14), transparent 66%);
+}
+:root[data-theme="light"] body::after{
+  background:radial-gradient(120% 85% at 50% 0%, transparent 60%, rgba(12,16,23,.07) 100%);
+}
+
+/* ── Header: glass with a lit gold seam ─────────────────────────────── */
+header{
+  background:color-mix(in srgb, var(--e1) 82%, transparent);
+  backdrop-filter:blur(16px) saturate(1.3);
+  box-shadow:0 1px 0 rgba(227,179,65,.18), 0 10px 34px rgba(0,0,0,.5);
+}
+header::after{
+  content:""; position:absolute; left:0; right:0; bottom:-1px; height:1px;
+  background:linear-gradient(90deg, transparent, rgba(227,179,65,.65) 22%,
+             rgba(245,208,120,.9) 50%, rgba(227,179,65,.65) 78%, transparent);
+  opacity:.55;
+}
+/* Brushed shine across the logo mark. */
+.mark{ position:relative; overflow:hidden; }
+.mark::after{
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(115deg, transparent 34%, rgba(255,255,255,.55) 48%, transparent 60%);
+  transform:translateX(-120%);
+  animation:shine 6.5s ease-in-out infinite;
+}
+@keyframes shine{ 0%,68%{transform:translateX(-120%)} 84%,100%{transform:translateX(120%)} }
+
+/* ── Hero: lit top edge and a deeper glow well ──────────────────────── */
+.intro{ position:relative; }
+.intro::after{
+  content:""; position:absolute; top:0; left:14%; right:14%; height:1px;
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,.34), transparent);
+}
+.card{ box-shadow:var(--hi-top), var(--amb), 0 0 0 1px rgba(255,255,255,.02); }
+.intro h2{
+  background:linear-gradient(180deg, #FFFFFF 0%, #C9D2E4 130%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+:root[data-theme="light"] .intro h2{
+  background:linear-gradient(180deg, #0C1017 0%, #46506A 130%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+
+/* ── Chips: warm glow that grows from the centre ────────────────────── */
+.ex{ position:relative; overflow:hidden; z-index:0; }
+.ex::before{
+  content:""; position:absolute; inset:0; z-index:-1; opacity:0;
+  background:radial-gradient(120% 160% at 50% 118%, rgba(227,179,65,.30), transparent 68%);
+  transition:opacity var(--dur) var(--ease);
+}
+.ex:hover::before{ opacity:1; }
+.ex:hover{ border-color:rgba(227,179,65,.5); }
+
+/* ── Composer: a permanent aura that blooms on focus ────────────────── */
+.bar2{ position:relative; }
+.bar2::before{
+  content:""; position:absolute; inset:-14px; z-index:-1; border-radius:32px;
+  background:radial-gradient(58% 120% at 50% 50%, rgba(227,179,65,.16), transparent 72%);
+  opacity:.5; transition:opacity var(--dur) var(--ease);
+}
+.bar2:focus-within::before{ opacity:1; }
+
+/* Icon buttons hold real icons now. */
+.iconbtn svg{ display:block; }
+#mic svg{ transition:transform var(--dur) var(--ease); }
+#mic:hover svg{ transform:scale(1.08); }
+#mic.on{ animation:none; }
+/* Listening: concentric rings, drawn once, animated on transform only. */
+#mic.on::before, #mic.on::after{
+  content:""; position:absolute; inset:0; border-radius:50%;
+  border:1.5px solid rgba(227,179,65,.55); pointer-events:none;
+  animation:ring 1.9s var(--ease) infinite;
+}
+#mic.on::after{ animation-delay:.95s; }
+@keyframes ring{
+  from{ transform:scale(1); opacity:.75; }
+  to  { transform:scale(2.1); opacity:0; }
+}
+#mic{ position:relative; }
+
+/* ── Gold surfaces get a light sweep on press-ready hover ───────────── */
+.go{ position:relative; overflow:hidden; }
+.go::after{
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(115deg, transparent 36%, rgba(255,255,255,.5) 50%, transparent 64%);
+  transform:translateX(-120%); transition:transform 620ms var(--ease);
+}
+.go:hover:not(:disabled)::after{ transform:translateX(120%); }
+
+/* ── Evidence and answers: a touch more presence ────────────────────── */
+.src{ position:relative; }
+.src::before{
+  content:""; position:absolute; left:-2px; top:0; bottom:0; width:2px;
+  background:linear-gradient(180deg, var(--gold-hi), transparent);
+  opacity:.85;
+}
+.cite{ box-shadow:0 0 0 1px rgba(227,179,65,.08); }
+.badge.ok{ box-shadow:0 0 14px rgba(61,220,151,.16); }
+.you div{ box-shadow:var(--hi-top), 0 6px 18px rgba(0,0,0,.35); }
+
+/* Timeline studs glow faintly. */
+.tlitem::before{ box-shadow:0 0 0 1px rgba(227,179,65,.3), 0 0 12px rgba(227,179,65,.35); }
+.tlitem.orig::before{ box-shadow:0 0 0 1px rgba(61,220,151,.35), 0 0 12px rgba(61,220,151,.35); }
+
+/* Tabs: the active pill throws a small gold pool downward. */
+.tab[aria-selected="true"]::after{
+  content:""; position:absolute; left:20%; right:20%; bottom:-9px; height:9px;
+  background:radial-gradient(60% 100% at 50% 0%, rgba(227,179,65,.35), transparent 72%);
+  pointer-events:none;
+}
+
+@media (prefers-reduced-motion: reduce){
+  body::before{ animation:none; }
+  .mark::after, #mic.on::before, #mic.on::after, .go::after{ animation:none; transition:none; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hwrap">
+    <div class="brand">
+      <div class="mark">MS</div>
+      <div>
+        <h1>Manak Sahayak</h1>
+        <span id="tagline"></span>
+      </div>
+    </div>
+    <div class="chips" id="chips"></div>
+    <button class="iconbtn" id="newchat" title=""></button>
+    <button class="iconbtn" id="lang">अ</button>
+    <button class="iconbtn" id="theme" title="Theme"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z"/></svg></button>
+  </div>
+  <nav role="tablist" id="tabs">
+    <button class="tab" role="tab" aria-selected="true"  data-view="ask"    data-t="tabAsk"></button>
+    <button class="tab" role="tab" aria-selected="false" data-view="time"   data-t="tabTime"></button>
+    <button class="tab" role="tab" aria-selected="false" data-view="path"   data-t="tabPath"></button>
+    <button class="tab" role="tab" aria-selected="false" data-view="verify" data-t="tabVerify"></button>
+  </nav>
+</header>
+
+<main>
+  <section class="view on" id="v-ask">
+    <div class="card intro">
+      <h2 id="introH"></h2>
+      <p id="introP1"></p>
+      <p id="introP2"></p>
+      <div class="exwrap" id="examples"></div>
+    </div>
+    <div id="feed"></div>
+  </section>
+
+  <section class="view" id="v-time">
+    <div class="card intro">
+      <h2 data-t="timeH"></h2>
+      <p data-t="timeP"></p>
+      <div class="exwrap" id="prodlist"></div>
+      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+        <input id="prodq" class="inline" type="text" />
+        <button class="go" id="prodgo" data-t="timePick"></button>
+      </div>
+    </div>
+    <div id="timeout"></div>
+  </section>
+
+  <section class="view" id="v-path">
+    <div class="card intro">
+      <h2 data-t="pathH"></h2>
+      <p data-t="pathP"></p>
+      <div id="pathq"></div>
+      <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="go" id="pathgo" data-t="pathGo"></button>
+        <button class="tool" id="pathreset" data-t="pathAgain"></button>
+      </div>
+    </div>
+    <div id="pathout"></div>
+  </section>
+
+  <section class="view" id="v-verify">
+    <div class="card intro">
+      <h2 data-t="verifyH"></h2>
+      <p data-t="verifyP"></p>
+      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+        <input id="markq" class="inline" type="text" />
+        <button class="go" id="markgo" data-t="verifyGo"></button>
+      </div>
+    </div>
+    <div id="markout"></div>
+  </section>
+</main>
+
+<footer>
+  <div class="bar2">
+    <input id="q" type="text" autocomplete="off" />
+    <button class="iconbtn" id="mic" title=""><svg class="mic-ico" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 10.5a6.5 6.5 0 0 0 13 0"/><path d="M12 17v4.2M9 21.5h6"/></svg></button>
+    <button class="go" id="send"></button>
+  </div>
+  <div class="hint" id="hint"></div>
+</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const feed=$('#feed'), qBox=$('#q'), sendBtn=$('#send');
+let LANG='en', HEALTH=null;
+// Recent turns, sent with each question so follow-ups resolve.
+// Context only — the server never treats it as a source of facts.
+let HISTORY=[];
+
+/* ── Translations ──────────────────────────────────────────────────────
+   Every user-visible string lives here, including ones built at render
+   time. Anything hardcoded in JS below would silently stay English when
+   the language is switched — that was the original bug. */
+const I18N={
+ en:{
+  tagline:'Grounded assistant for Indian Standards & BIS',
+  introH:'Ask about Indian Standards, certification and QCOs',
+  introP1:'Answers are drawn from official BIS documents, and every fact is linked to the exact document and page it came from.',
+  introP2:'If the documents don’t cover your question, you still get a helpful answer — clearly marked as general guidance rather than verified fact.',
+  ph:'Ask about BIS standards, certification, QCO, hallmarking…',
+  ask:'Ask', thinking:'Searching official BIS documents…',
+  stage1:'Searching official BIS documents…', stage2:'Reading the matching pages…',
+  stage3:'Checking every fact against its source…', stage4:'Writing the answer…',
+  offline:'Offline', offlineTip:'Answer using only exact document quotes. No internet, always free.',
+  newchat:'New', newchatTip:'Start a new conversation',
+  micTip:'Ask by voice', micStop:'Stop listening',
+  micDenied:'Microphone permission was blocked. Allow it in your browser settings.',
+  hint:'Answers cite the BIS document and page they come from.',
+  hintNoVec:'Search is still being prepared. Keyword search is available now.',
+  docs:'documents', passages:'passages', callsLeft:'AI answers left today', llmOff:'Offline mode · free',
+  bAi:'Verified from BIS documents', bSrc:'Direct quotes from documents',
+  bGen:'General guidance', bNo:'Could not answer',
+  srcCited:'Sources', srcFound:'Documents found', show:'Show the original text',
+  page:'page', original:'open original',
+  genFoot:'Based on general knowledge — confirm exact figures with BIS.',
+  unverified:'This answer is based on general knowledge, not on the official BIS documents indexed here. Please confirm exact fees, dates and standard numbers with BIS before acting on it.',
+  copy:'Copy', copied:'Copied', speak:'Read aloud', stop:'Stop',
+  noVoice:'Speech is not available in this browser.',
+  followH:'You might also ask', badcite:'removed invalid citation',
+  err:'Something went wrong', unavailable:'Service unavailable',
+  tabAsk:'Ask', tabTime:'Compliance timeline', tabPath:'Which scheme applies?', tabVerify:'Check a mark',
+  timeH:'Trace a product’s regulatory history',
+  timeP:'A Quality Control Order is rarely one document. Pick a product to see its original order and every amendment and extension, in date order, with the gazette number for each.',
+  timePick:'Choose a product', timeSearch:'or type a product name…',
+  timeOrders:'orders', timeAmend:'amendments / extensions', timeUndated:'undated',
+  timeLatest:'Most recent order', timeNone:'No Quality Control Orders found for that product in the indexed corpus.',
+  kindOriginal:'Principal order', kindAmendment:'Amendment', kindExtension:'Extension', kindUnknown:'Order',
+  dateFrom:'date from', timeStandards:'Standards referenced',
+  pathH:'Find the scheme that applies to you', pathP:'Answer two questions. Every requirement shown is cited to a real BIS document.',
+  pathGo:'Show my pathway', pathPickAll:'Please answer both questions first.', pathScheme:'Applicable scheme', pathWhy:'Why this scheme',
+  pathSteps:'What the documents require', pathAgain:'Start over',
+  verifyH:'Check a licence number, HUID or standard',
+  verifyP:'Paste a BIS licence number (CM/L…), a six-character HUID from a hallmark, a CRS number (R…) or an Indian Standard number.',
+  verifyGo:'Check format', verifyPh:'e.g. CM/L 6300082303, A1B2C3, or IS 17440',
+  verifyFormat:'Format', verifyCaution:'Important', verifyWhere:'Verify officially at',
+  verifyAsk:'Ask about this', print:'Print / save as PDF',
+ },
+ hi:{
+  tagline:'भारतीय मानक और बीआईएस के लिए प्रमाणित सहायक',
+  introH:'भारतीय मानकों, प्रमाणन और QCO के बारे में पूछें',
+  introP1:'उत्तर आधिकारिक बीआईएस दस्तावेज़ों से लिए जाते हैं, और हर तथ्य के साथ उस दस्तावेज़ और पृष्ठ का संदर्भ दिया जाता है।',
+  introP2:'यदि दस्तावेज़ों में आपके प्रश्न का उत्तर नहीं है, तब भी आपको सहायक उत्तर मिलेगा — जिसे सामान्य जानकारी के रूप में स्पष्ट रूप से चिह्नित किया जाएगा।',
+  ph:'बीआईएस मानक, प्रमाणन, QCO, हॉलमार्किंग के बारे में पूछें…',
+  ask:'पूछें', thinking:'आधिकारिक बीआईएस दस्तावेज़ों में खोजा जा रहा है…',
+  stage1:'आधिकारिक बीआईएस दस्तावेज़ों में खोजा जा रहा है…', stage2:'मिलान वाले पृष्ठ पढ़े जा रहे हैं…',
+  stage3:'हर तथ्य को उसके स्रोत से मिलाया जा रहा है…', stage4:'उत्तर तैयार किया जा रहा है…',
+  offline:'ऑफ़लाइन', offlineTip:'केवल दस्तावेज़ों के मूल अंश दिखाएँ। इंटरनेट की आवश्यकता नहीं, हमेशा निःशुल्क।',
+  newchat:'नया', newchatTip:'नई बातचीत शुरू करें',
+  micTip:'बोलकर पूछें', micStop:'सुनना बंद करें',
+  micDenied:'माइक्रोफ़ोन की अनुमति अवरुद्ध है। ब्राउज़र सेटिंग्स में इसे अनुमति दें।',
+  hint:'हर उत्तर में उस बीआईएस दस्तावेज़ और पृष्ठ का संदर्भ होता है।',
+  hintNoVec:'खोज तैयार की जा रही है। फ़िलहाल कीवर्ड खोज उपलब्ध है।',
+  docs:'दस्तावेज़', passages:'अंश', callsLeft:'आज शेष एआई उत्तर', llmOff:'ऑफ़लाइन मोड · निःशुल्क',
+  bAi:'बीआईएस दस्तावेज़ों से प्रमाणित', bSrc:'दस्तावेज़ों के मूल अंश',
+  bGen:'सामान्य जानकारी', bNo:'उत्तर नहीं मिल सका',
+  srcCited:'स्रोत', srcFound:'प्राप्त दस्तावेज़', show:'मूल पाठ देखें',
+  page:'पृष्ठ', original:'मूल दस्तावेज़ खोलें',
+  genFoot:'सामान्य जानकारी पर आधारित — सटीक आँकड़े बीआईएस से सत्यापित करें।',
+  unverified:'यह उत्तर सामान्य जानकारी पर आधारित है, यहाँ अनुक्रमित आधिकारिक बीआईएस दस्तावेज़ों पर नहीं। कार्य करने से पहले सटीक शुल्क, तिथियाँ और मानक संख्याएँ बीआईएस से अवश्य सत्यापित करें।',
+  copy:'कॉपी', copied:'कॉपी हो गया', speak:'सुनें', stop:'रोकें',
+  noVoice:'इस ब्राउज़र में वाणी उपलब्ध नहीं है।',
+  followH:'आप यह भी पूछ सकते हैं', badcite:'अमान्य संदर्भ हटाया गया',
+  err:'कुछ गड़बड़ हो गई', unavailable:'सेवा उपलब्ध नहीं है',
+  tabAsk:'प्रश्न', tabTime:'अनुपालन समयरेखा', tabPath:'कौन सी योजना लागू?', tabVerify:'चिह्न जाँचें',
+  timeH:'किसी उत्पाद का नियामक इतिहास देखें',
+  timeP:'गुणवत्ता नियंत्रण आदेश आमतौर पर एक दस्तावेज़ नहीं होता। उत्पाद चुनें और मूल आदेश सहित हर संशोधन और विस्तार तिथि-क्रम में देखें।',
+  timePick:'उत्पाद चुनें', timeSearch:'या उत्पाद का नाम लिखें…',
+  timeOrders:'आदेश', timeAmend:'संशोधन / विस्तार', timeUndated:'अदिनांकित',
+  timeLatest:'सबसे हाल का आदेश', timeNone:'इस उत्पाद के लिए कोई गुणवत्ता नियंत्रण आदेश नहीं मिला।',
+  kindOriginal:'मूल आदेश', kindAmendment:'संशोधन', kindExtension:'विस्तार', kindUnknown:'आदेश',
+  dateFrom:'तिथि का स्रोत', timeStandards:'संदर्भित मानक',
+  pathH:'आप पर लागू योजना जानें', pathP:'दो प्रश्नों के उत्तर दें। हर आवश्यकता का संदर्भ वास्तविक बीआईएस दस्तावेज़ से है।',
+  pathGo:'मेरा मार्ग दिखाएँ', pathPickAll:'कृपया पहले दोनों प्रश्नों के उत्तर दें।', pathScheme:'लागू योजना', pathWhy:'यह योजना क्यों',
+  pathSteps:'दस्तावेज़ों के अनुसार आवश्यकताएँ', pathAgain:'फिर से शुरू करें',
+  verifyH:'लाइसेंस नंबर, HUID या मानक जाँचें',
+  verifyP:'बीआईएस लाइसेंस नंबर (CM/L…), हॉलमार्क का छह-अक्षरीय HUID, CRS नंबर (R…) या भारतीय मानक संख्या दर्ज करें।',
+  verifyGo:'प्रारूप जाँचें', verifyPh:'जैसे CM/L 6300082303, A1B2C3, या IS 17440',
+  verifyFormat:'प्रारूप', verifyCaution:'महत्वपूर्ण', verifyWhere:'आधिकारिक सत्यापन',
+  verifyAsk:'इसके बारे में पूछें', print:'प्रिंट / PDF सहेजें',
+ }};
+const t=k=>(I18N[LANG]&&I18N[LANG][k])||I18N.en[k]||k;
+
+const EXAMPLES=[
+ {en:'On what grounds can BIS cancel a licence?', hi:'बीआईएस लाइसेंस किन कारणों से रद्द कर सकता है?',
+  lEn:'Licence cancellation', lHi:'लाइसेंस रद्दीकरण'},
+ {en:'How long is a CRS registration valid?', hi:'सीआरएस पंजीकरण कितने समय तक वैध रहता है?',
+  lEn:'CRS validity', lHi:'सीआरएस वैधता'},
+ {en:'What punishment applies for misusing the Standard Mark?', hi:'मानक चिह्न के दुरुपयोग पर क्या दंड है?',
+  lEn:'Penalties', lHi:'दंड प्रावधान'},
+ {en:'How much does a jeweller pay for hallmarking gold?', hi:'हॉलमार्किंग के लिए ज्वैलर को कितना शुल्क देना होता है?',
+  lEn:'Hallmarking fee', lHi:'हॉलमार्किंग शुल्क'},
+ {en:'I manufacture outside India. How do I get BIS certification?', hi:'मैं भारत के बाहर विनिर्माण करता हूँ। बीआईएस प्रमाणन कैसे प्राप्त करूँ?',
+  lEn:'Foreign manufacturer', lHi:'विदेशी विनिर्माता'}];
+
+/* Follow-up prompts keyed by the document category an answer came from.
+   These are navigation aids, never claims — they only pose questions. */
+const FOLLOWUPS={
+ '07_HALLMARKING':[['What is a HUID?','HUID क्या है?'],['Which districts require mandatory hallmarking?','किन जिलों में हॉलमार्किंग अनिवार्य है?']],
+ '06_CRS':[['Which products need CRS registration?','किन उत्पादों को सीआरएस पंजीकरण चाहिए?'],['How do I renew a CRS registration?','सीआरएस पंजीकरण का नवीनीकरण कैसे करें?']],
+ '05_FMCS':[['What documents does a foreign manufacturer submit?','विदेशी विनिर्माता कौन से दस्तावेज़ जमा करता है?'],['Who can be an authorised Indian representative?','अधिकृत भारतीय प्रतिनिधि कौन हो सकता है?']],
+ '03_QCO':[['Which products are covered by a QCO?','कौन से उत्पाद QCO के अंतर्गत आते हैं?'],['Are there exemptions for research imports?','अनुसंधान आयात के लिए क्या छूट है?']],
+ '02_PRODUCT_CERTIFICATION':[['How do I apply for an ISI mark licence?','आईएसआई मार्क लाइसेंस के लिए आवेदन कैसे करें?'],['What are the BIS certification fees?','बीआईएस प्रमाणन शुल्क क्या हैं?']],
+ '08_LABORATORY':[['How does a lab get BIS recognition?','प्रयोगशाला को बीआईएस मान्यता कैसे मिलती है?']],
+ '10_BIS_ORGANIZATION':[['What does the BIS Act 2016 cover?','बीआईएस अधिनियम 2016 में क्या है?']]};
+
+const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=s=>esc(s).replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+                   .replace(/`([^`]+)`/g,'<code>$1</code>')
+                   .replace(/\[S(\d+)\]/g,'<span class="cite" data-s="$1">[S$1]</span>');
+
+let toastTimer;
+function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),1800);}
+
+/* ── Language ───────────────────────────────────────────────────────── */
+function applyLang(){
+  document.documentElement.lang = LANG;
+  $$('[data-t]').forEach(el=>el.textContent=t(el.dataset.t));
+  $('#tagline').textContent=t('tagline');
+  $('#introH').textContent=t('introH');
+  $('#introP1').textContent=t('introP1');
+  $('#introP2').textContent=t('introP2');
+  qBox.placeholder=t('ph');
+  sendBtn.textContent=t('ask');
+  $('#newchat').textContent=t('newchat');
+  $('#newchat').title=t('newchatTip');
+  $('#mic').title=t('micTip');
+  $('#lang').textContent = LANG==='en' ? 'अ' : 'A';
+  renderExamples();
+  renderHealth();   // chips + hint are built in JS, so re-render them too
+  const pq=$('#prodq'); if(pq) pq.placeholder=t('timeSearch');
+  const mq=$('#markq'); if(mq) mq.placeholder=t('verifyPh');
+  if(typeof PATHQ!=='undefined' && PATHQ.length) renderPathQuestions();
+  if(recog) recog.lang = LANG==='hi' ? 'hi-IN' : 'en-IN';
+}
+$('#lang').onclick=()=>{LANG = LANG==='en' ? 'hi' : 'en'; applyLang();
+  try{localStorage.setItem('ms-lang',LANG)}catch(e){}};
+try{const l=localStorage.getItem('ms-lang'); if(l) LANG=l;}catch(e){}
+
+$('#theme').onclick=()=>{
+  const cur=document.documentElement.getAttribute('data-theme');
+  const next=cur==='dark'?'light':cur==='light'?'dark':
+    (matchMedia('(prefers-color-scheme: dark)').matches?'light':'dark');
+  document.documentElement.setAttribute('data-theme',next);
+  try{localStorage.setItem('ms-theme',next)}catch(e){}
+};
+try{const s=localStorage.getItem('ms-theme'); if(s)document.documentElement.setAttribute('data-theme',s);}catch(e){}
+
+$('#newchat').onclick=()=>{stopSpeech();feed.innerHTML='';HISTORY=[];};
+
+function renderExamples(){
+  $('#examples').innerHTML = EXAMPLES.map(e=>{
+    const q = LANG==='hi' ? e.hi : e.en, l = LANG==='hi' ? e.lHi : e.lEn;
+    return `<button class="ex" data-q="${esc(q)}">${esc(l)}</button>`;
+  }).join('');
+}
+
+/* ── Health chips ──────────────────────────────────────────────────── */
+function renderHealth(){
+  const c=$('#chips');
+  if(!HEALTH){c.innerHTML='';return;}
+  if(HEALTH.status!=='ok'){c.innerHTML=`<span class="chip">${esc(t('unavailable'))}</span>`;return;}
+  // Document counts, passage counts and remaining AI calls are operator
+  // metrics, not something a person asking about a hallmark needs to see.
+  // Health is still fetched — it decides the hint line below and which
+  // search modes are available — it is just no longer put on screen.
+  c.innerHTML = '';
+  $('#hint').textContent = HEALTH.semantic_available ? t('hint') : t('hintNoVec');
+}
+async function loadHealth(){
+  try{ HEALTH = await (await fetch('/health')).json(); }
+  catch(e){ HEALTH={status:'down'}; }
+  renderHealth();
+}
+
+/* ── Asking ────────────────────────────────────────────────────────── */
+function add(html,cls){const d=document.createElement('div');d.className='msg '+cls;
+  d.innerHTML=html;feed.appendChild(d);d.scrollIntoView({behavior:'smooth',block:'end'});return d;}
+
+function sourceCard(s,n){
+  return `<div class="src" data-sn="${n}">
+    <div class="top"><span class="sn">[S${n}]</span><span class="st">${esc(s.title)}</span></div>
+    <div class="sl">${esc(s.document)} · ${esc(t('page'))} ${s.page}${
+      s.source_url?` · <a href="${esc(s.source_url)}" target="_blank" rel="noopener">${esc(t('original'))}</a>`:''}</div>
+    <details><summary>${esc(t('show'))}</summary><blockquote>${esc(s.text)}</blockquote></details>
+  </div>`;
+}
+
+function followUps(sources){
+  const cats=[...new Set((sources||[]).map(s=>s.category).filter(Boolean))];
+  const qs=[];
+  cats.forEach(c=>(FOLLOWUPS[c]||[]).forEach(pair=>{
+    const q = LANG==='hi' ? pair[1] : pair[0];
+    if(!qs.includes(q)) qs.push(q);
+  }));
+  if(!qs.length) return '';
+  return `<div class="followups"><h5>${esc(t('followH'))}</h5><div class="exwrap">`+
+    qs.slice(0,3).map(q=>`<button class="ex" data-q="${esc(q)}">${esc(q)}</button>`).join('')+
+    '</div></div>';
+}
+
+async function ask(text){
+  if(!text.trim())return;
+  stopSpeech(); endDictation();
+  HISTORY.push({role:'user',content:text});
+  add(`<div>${esc(text)}</div>`,'you');
+  qBox.value='';sendBtn.disabled=true;
+  const pending=add(`<div class="load"><span class="sp"></span><span class="pmsg">${esc(t('thinking'))}</span><span class="ptime"></span></div>`,'bot card');
+  // A grounded answer takes 20-60s against NVIDIA's free tier. A static
+  // spinner for that long reads as broken, so show what stage it is at and
+  // how long it has been going.
+  const stages=[t('stage1'),t('stage2'),t('stage3'),t('stage4')];
+  const t0=Date.now(); let si=0;
+  const ticker=setInterval(()=>{
+    const el=pending.querySelector('.pmsg'), tm=pending.querySelector('.ptime');
+    if(!el){clearInterval(ticker);return;}
+    const secs=Math.round((Date.now()-t0)/1000);
+    if(secs>6 && si<stages.length-1 && secs>si*12+6) el.textContent=stages[Math.min(++si,stages.length-1)];
+    if(tm) tm.textContent=` ${secs}s`;
+  },1000);
+  try{
+    const r=await fetch('/ask',{method:'POST',headers:{'Content-Type':'application/json'},
+      // `language` makes the answer follow the interface language, not the
+      // script the question happened to be typed in.
+      body:JSON.stringify({question:text,mode:'hybrid',
+        language:LANG, history:HISTORY.slice(-6)})});
+    if(!r.ok){
+      const d=await r.json().catch(()=>({}));
+      pending.innerHTML=`<div class="meta"><span class="badge no">${esc(t('err'))}</span></div>
+        <div class="answer">${esc(d.detail||r.statusText)}</div>`;
+      return;
+    }
+    const d=await r.json();
+    let h='<div class="meta">';
+    if(d.refused)                h+=`<span class="badge no">${esc(t('bNo'))}</span>`;
+    else if(d.general_knowledge) h+=`<span class="badge info">${esc(t('bGen'))}</span>`;
+    else if(d.extractive)        h+=`<span class="badge">${esc(t('bSrc'))}</span>`;
+    else                         h+=`<span class="badge ok">✓ ${esc(t('bAi'))}</span>`;
+    if(d.invalid_citations&&d.invalid_citations.length)
+      h+=`<span class="badge no">${esc(t('badcite'))}</span>`;
+    h+='</div>';
+
+    // General-knowledge answers get an explicit, unmissable disclaimer —
+    // they must never be mistaken for something the documents support.
+
+
+    h+='<div class="answer">'+fmt(d.answer)+'</div>';
+    h+=`<div class="tools">
+        <button class="tool" data-act="copy">${esc(t('copy'))}</button>
+        <button class="tool" data-act="speak" aria-pressed="false">${esc(t('speak'))}</button>
+      </div>`;
+
+    if(d.general_knowledge)
+      h+=`<div class="genfoot">${esc(t('genFoot'))}</div>`;
+    if(d.sources&&d.sources.length){
+      h+=`<div class="srcs"><h4>${esc(d.cited&&d.cited.length?t('srcCited'):t('srcFound'))}</h4>`;
+      d.sources.forEach((s,i)=>h+=sourceCard(s,(d.cited&&d.cited.length)?d.cited[i]:i+1));
+      h+='</div>';
+    }
+    h+=followUps(d.sources);
+    pending.innerHTML=h;
+    pending.dataset.plain=d.answer;
+    HISTORY.push({role:'assistant',content:(d.answer||'').slice(0,600)});
+    loadHealth();
+  }catch(e){
+    pending.innerHTML=`<div class="meta"><span class="badge no">${esc(t('err'))}</span></div>
+      <div class="answer">${esc(String(e))}</div>`;
+  }finally{clearInterval(ticker);sendBtn.disabled=false;}
+}
+
+document.addEventListener('click',e=>{
+  const ex=e.target.closest('.ex');
+  if(ex){ask(ex.dataset.q);return;}
+
+  const c=e.target.closest('.cite');
+  if(c){
+    const card=c.closest('.bot')?.querySelector(`.src[data-sn="${c.dataset.s}"]`);
+    if(card){card.scrollIntoView({behavior:'smooth',block:'center'});
+      card.classList.add('flash');setTimeout(()=>card.classList.remove('flash'),1400);}
+    return;
+  }
+
+  const tool=e.target.closest('.tool');
+  if(tool){
+    const bot=tool.closest('.bot'), plain=bot?.dataset.plain||'';
+    if(tool.dataset.act==='copy'){
+      navigator.clipboard?.writeText(plain).then(()=>toast(t('copied')),()=>{});
+    }else if(tool.dataset.act==='speak'){
+      if(SPEAKING===tool) stopSpeech(); else startSpeech(tool, plain);
+    }
+  }
+});
+
+
+/* ── Reading answers aloud ─────────────────────────────────────────────
+   Three real problems this handles:
+   - Stopping used to reset only the button that was clicked, so starting a
+     second answer left the first one's button stuck reading "Stop".
+   - Nothing reset the button if speech errored, stranding it on "Stop".
+   - Chrome silently halts speechSynthesis after ~15s of continuous speech,
+     cutting long answers off mid-sentence. Speaking sentence by sentence and
+     nudging resume() keeps it going. */
+let SPEAKING = null;      // the button currently reading, if any
+let SPEECH_TICK = null;   // Chrome keep-alive
+
+function resetSpeakButtons(){
+  $$('[data-act="speak"]').forEach(b=>{
+    b.textContent = t('speak');
+    b.setAttribute('aria-pressed','false');
+  });
+}
+
+function stopSpeech(){
+  if(SPEECH_TICK){ clearInterval(SPEECH_TICK); SPEECH_TICK=null; }
+  try{ window.speechSynthesis?.cancel(); }catch(e){}
+  resetSpeakButtons();
+  SPEAKING = null;
+}
+
+function pickVoice(hindi){
+  const vs = window.speechSynthesis?.getVoices() || [];
+  if(!vs.length) return null;
+  const want = hindi ? 'hi' : 'en';
+  return vs.find(v=>v.lang===(hindi?'hi-IN':'en-IN'))
+      || vs.find(v=>v.lang && v.lang.toLowerCase().startsWith(want))
+      || null;
+}
+
+function startSpeech(tool, raw){
+  const synth = window.speechSynthesis;
+  if(!synth){ toast(t('noVoice')); return; }
+
+  stopSpeech();   // whatever else was reading stops first
+
+  // Read the words, not the notation.
+  const clean = (raw||'')
+    .replace(/\[S\d+\]/g,' ')
+    .replace(/\*\*/g,'')
+    .replace(/`/g,'')
+    .replace(/\s+/g,' ')
+    .trim();
+  if(!clean){ return; }
+
+  // Sentence-sized utterances: Chrome drops a single long one part-way.
+  const parts = clean.match(/[^.!?।]{1,240}(?:[.!?।]+|$)/g) || [clean];
+  const hindi = LANG==='hi';
+  const voice = pickVoice(hindi);
+  let i = 0;
+
+  const next = () => {
+    if(SPEAKING !== tool){ return; }          // stopped or superseded
+    if(i >= parts.length){ stopSpeech(); return; }
+    const u = new SpeechSynthesisUtterance(parts[i++]);
+    u.lang = hindi ? 'hi-IN' : 'en-IN';
+    if(voice) u.voice = voice;
+    u.rate = 1; u.pitch = 1;
+    u.onend = next;
+    // Only tear down if this utterance still belongs to the active button.
+    // cancel() fires onerror asynchronously, so an utterance being stopped
+    // would otherwise kill the reading the user just started on another
+    // answer — the second click looked like it did nothing.
+    u.onerror = () => { if(SPEAKING === tool) stopSpeech(); };
+    synth.speak(u);
+  };
+
+  SPEAKING = tool;
+  tool.textContent = t('stop');
+  tool.setAttribute('aria-pressed','true');
+  SPEECH_TICK = setInterval(()=>{
+    if(!synth.speaking){ return; }
+    if(synth.paused) synth.resume();
+  }, 7000);
+  next();
+}
+
+// Voices load asynchronously in some browsers.
+if(window.speechSynthesis) window.speechSynthesis.onvoiceschanged = ()=>{};
+// Never leave speech running when the context changes.
+window.addEventListener('beforeunload', stopSpeech);
+window.addEventListener('pagehide', stopSpeech);
+
+/* ── Voice input ───────────────────────────────────────────────────── */
+let recog=null, LISTENING=false, FINAL_TEXT='';
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+function micOn(on){
+  LISTENING = on;
+  const m = $('#mic');
+  m.classList.toggle('on', on);
+  m.title = on ? t('micStop') : t('micTip');
+  $('.bar2')?.classList.toggle('listening', on);
+  if(!on) qBox.classList.remove('interim');
+}
+
+if(SR){
+  recog = new SR();
+  // continuous + interim is what makes this behave like a real dictation
+  // box: it keeps listening through natural pauses and shows the words as
+  // they are recognised, instead of cutting off at the first silence.
+  recog.continuous = true;
+  recog.interimResults = true;
+  recog.maxAlternatives = 1;
+  recog.lang = LANG==='hi' ? 'hi-IN' : 'en-IN';
+
+  recog.onresult = ev => {
+    let interim = '';
+    for(let i = ev.resultIndex; i < ev.results.length; i++){
+      const chunk = ev.results[i][0].transcript;
+      if(ev.results[i].isFinal) FINAL_TEXT += chunk;
+      else interim += chunk;
+    }
+    // Live transcript: settled words plus what is still being heard.
+    qBox.value = (FINAL_TEXT + interim).replace(/\s+/g,' ').trimStart();
+    qBox.classList.toggle('interim', !!interim);
+    // Never submit on its own — a pause is not the end of a thought. The
+    // user decides when the question is finished.
+  };
+
+  recog.onend = () => {
+    // Chrome ends the session after a stretch of silence even in continuous
+    // mode. If the user has not pressed stop, start listening again.
+    if(LISTENING){
+      try{ recog.start(); return; }catch(e){}
+    }
+    micOn(false);
+  };
+
+  recog.onerror = ev => {
+    if(ev.error === 'no-speech' && LISTENING){ return; }   // just quiet, keep going
+    if(ev.error === 'not-allowed' || ev.error === 'service-not-allowed'){
+      toast(t('micDenied'));
+    }
+    micOn(false);
+  };
+
+  $('#mic').onclick = () => {
+    if(LISTENING){ micOn(false); try{ recog.stop(); }catch(e){} qBox.focus(); return; }
+    stopSpeech();                        // don't listen and talk at once
+    FINAL_TEXT = qBox.value ? qBox.value.trim() + ' ' : '';
+    recog.lang = LANG==='hi' ? 'hi-IN' : 'en-IN';
+    try{ recog.start(); micOn(true); }catch(e){ micOn(false); }
+  };
+}else{
+  $('#mic').style.display='none';   // browser can't do speech input
+}
+
+// Sending clears the dictation buffer so the next one starts fresh.
+function endDictation(){
+  if(LISTENING){ micOn(false); try{ recog.stop(); }catch(e){} }
+  FINAL_TEXT = '';
+}
+
+sendBtn.onclick=()=>ask(qBox.value);
+qBox.addEventListener('keydown',e=>{if(e.key==='Enter')ask(qBox.value);});
+/* ── Tabs ──────────────────────────────────────────────────────────── */
+let VIEW='ask';
+$$('.tab').forEach(b=>b.onclick=()=>{
+  $$('.tab').forEach(x=>x.setAttribute('aria-selected',String(x===b)));
+  stopSpeech();
+  VIEW=b.dataset.view;
+  $$('.view').forEach(v=>v.classList.toggle('on', v.id==='v-'+VIEW));
+  document.querySelector('footer').style.display = VIEW==='ask' ? '' : 'none';
+  if(VIEW==='time' && !$('#prodlist').children.length) loadProducts();
+  if(VIEW==='path' && !$('#pathq').children.length)   loadPathQuestions();
+});
+
+/* ── Compliance timeline ───────────────────────────────────────────── */
+async function loadProducts(){
+  try{
+    const d=await (await fetch('/products')).json();
+    $('#prodlist').innerHTML = d.products.slice(0,14).map(p=>
+      `<button class="ex" data-prod="${esc(p.name)}">${esc(p.name)} · ${p.orders}</button>`).join('');
+  }catch(e){}
+}
+
+function kindLabel(k){
+  return {original:t('kindOriginal'),amendment:t('kindAmendment'),
+          extension:t('kindExtension')}[k] || t('kindUnknown');
+}
+
+async function showTimeline(product){
+  if(!product||!product.trim()) return;
+  $('#timeout').innerHTML='<div class="card"><div class="empty"><span class="sp"></span></div></div>';
+  try{
+    const d=await (await fetch('/timeline',{method:'POST',
+      headers:{'Content-Type':'application/json'},body:JSON.stringify({product})})).json();
+    if(!d.order_count){
+      $('#timeout').innerHTML=`<div class="card"><div class="empty">${esc(t('timeNone'))}</div></div>`;
+      return;
+    }
+    let h=`<div class="kpis">
+      <div class="kpi"><div class="n">${d.order_count}</div><div class="l">${esc(t('timeOrders'))}</div></div>
+      <div class="kpi"><div class="n">${d.amendment_count}</div><div class="l">${esc(t('timeAmend'))}</div></div>
+      <div class="kpi"><div class="n">${d.undated_count}</div><div class="l">${esc(t('timeUndated'))}</div></div>
+    </div>`;
+    h+=`<div class="card" style="padding:18px 22px"><h3 style="margin:0 0 4px;font-size:17px">${esc(d.product)}</h3>`;
+    if(d.latest) h+=`<div style="font-size:12.5px;color:var(--muted)">${esc(t('timeLatest'))}: <b>${esc(d.latest.date)}</b> · ${esc(kindLabel(d.latest.kind))}</div>`;
+    if(d.standards&&d.standards.length)
+      h+=`<div style="font-size:12.5px;color:var(--muted);margin-top:4px">${esc(t('timeStandards'))}: ${d.standards.map(esc).join(', ')}</div>`;
+    h+='<div class="tl">';
+    d.orders.forEach(o=>{
+      const cls = o.kind==='original' ? 'orig' : (o.date ? '' : 'undated');
+      h+=`<div class="tlitem ${cls}">
+        <div><span class="tldate">${esc(o.date_label)}</span><span class="tlkind">${esc(kindLabel(o.kind))}</span></div>
+        <div style="margin-top:5px">${(o.gazette||[]).slice(0,2).map(g=>`<span class="gz">${esc(g)}</span>`).join('')}
+          ${(o.standards||[]).slice(0,3).map(x=>`<span class="badge">${esc(x)}</span>`).join('')}</div>
+        <div class="tlmeta">${esc(o.document)} · ${esc(t('page'))} ${o.page}
+          <span style="opacity:.7">· ${esc(t('dateFrom'))}: ${esc(o.date_source)}</span></div>
+      </div>`;
+    });
+    h+='</div>';
+    h+=`<div class="unverified" style="margin-top:14px">${esc(d.caveat)}</div>`;
+    h+=`<div class="tools"><button class="tool" data-print="1">${esc(t('print'))}</button></div>`;
+    h+='</div>';
+    $('#timeout').innerHTML=h;
+  }catch(e){ $('#timeout').innerHTML=`<div class="card"><div class="empty">${esc(String(e))}</div></div>`; }
+}
+
+/* ── Pathway ───────────────────────────────────────────────────────── */
+let PATHQ=[], PATHA={};
+async function loadPathQuestions(){
+  try{
+    PATHQ=(await (await fetch('/pathway/questions')).json()).questions;
+    renderPathQuestions();
+  }catch(e){}
+}
+function renderPathQuestions(){
+  $('#pathq').innerHTML = PATHQ.map(q=>`
+    <div class="qblock"><h4>${esc(q.prompt[LANG]||q.prompt.en)}</h4><div class="opts">`+
+    q.options.map(o=>`<button class="opt" data-q="${esc(q.key)}" data-v="${esc(o.value)}"
+      aria-pressed="${PATHA[q.key]===o.value}">${esc(o.label[LANG]||o.label.en)}</button>`).join('')+
+    '</div></div>').join('');
+}
+async function showPathway(){
+  if(Object.keys(PATHA).length < PATHQ.length){
+    $('#pathout').innerHTML=`<div class="card"><div class="empty">${esc(t('pathPickAll'))}</div></div>`;
+    return;
+  }
+  $('#pathout').innerHTML='<div class="card"><div class="empty"><span class="sp"></span></div></div>';
+  try{
+    const d=await (await fetch('/pathway',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({answers:PATHA,language:LANG})})).json();
+    let h=`<div class="card" style="padding:20px 24px">
+      <div class="badge ok" style="font-size:11px">${esc(t('pathScheme'))}</div>
+      <h3 style="margin:8px 0 6px;font-size:19px">${esc(d.scheme)}</h3>
+      <p style="margin:0 0 6px;color:var(--ink2)">${esc(d.summary)}</p>
+      <p style="margin:0;font-size:12.5px;color:var(--muted)"><b>${esc(t('pathWhy'))}:</b> ${esc(d.why)}</p>
+      <h4 style="margin:18px 0 10px;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)">${esc(t('pathSteps'))}</h4>`;
+    d.steps.forEach((st,i)=>{
+      h+=`<div class="step"><h4><span class="stepn">${i+1}</span>${esc(st.title)}</h4>`;
+      st.citations.forEach(c=>{
+        h+=`<div class="src" style="margin-top:8px">
+          <div class="st">${esc(c.title)}</div>
+          <div class="sl">${esc(c.document)} · ${esc(t('page'))} ${c.page}</div>
+          <details><summary>${esc(t('show'))}</summary><blockquote>${esc(c.text)}</blockquote></details>
+        </div>`;
+      });
+      if(!st.citations.length) h+=`<div style="font-size:12.5px;color:var(--muted)">${esc(st.detail)}</div>`;
+      h+='</div>';
+    });
+    h+=`<div class="unverified">${esc(d.caveat)}</div>`;
+    h+=`<div class="tools"><button class="tool" data-print="1">${esc(t('print'))}</button></div></div>`;
+    $('#pathout').innerHTML=h;
+  }catch(e){ $('#pathout').innerHTML=`<div class="card"><div class="empty">${esc(String(e))}</div></div>`; }
+}
+
+/* ── Mark decoder ──────────────────────────────────────────────────── */
+async function decodeMark(v){
+  if(!v||!v.trim()) return;
+  $('#markout').innerHTML='<div class="card"><div class="empty"><span class="sp"></span></div></div>';
+  try{
+    const d=await (await fetch('/decode',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({value:v})})).json();
+    let h=`<div class="card" style="padding:20px 24px">
+      <div class="badge ${d.recognised?'ok':'no'}">${d.recognised?'✓':'?'} ${esc(d.label)}</div>
+      <div style="font-family:ui-monospace,Consolas,monospace;font-size:17px;margin:12px 0 6px">${esc(d.input)}</div>
+      <p style="margin:0 0 10px;color:var(--ink2)">${esc(d.explanation)}</p>`;
+    if(d.format_note) h+=`<p style="margin:0 0 8px;font-size:12.5px;color:var(--muted)"><b>${esc(t('verifyFormat'))}:</b> ${esc(d.format_note)}</p>`;
+    (d.warnings||[]).forEach(w=>h+=`<div class="unverified" style="border-left-color:var(--warn);background:var(--warnbg)">⚠ ${esc(w)}</div>`);
+    if(d.caution) h+=`<div class="unverified"><b>${esc(t('verifyCaution'))}:</b> ${esc(d.caution)}</div>`;
+    if(d.verify_at) h+=`<p style="margin:10px 0 0;font-size:13px"><b>${esc(t('verifyWhere'))}:</b>
+      <a href="${esc(d.verify_at.url)}" target="_blank" rel="noopener">${esc(d.verify_at.name)}</a></p>`;
+    if(d.search_hint) h+=`<div class="tools"><button class="tool" data-askhint="${esc(d.search_hint)}">${esc(t('verifyAsk'))}</button></div>`;
+    h+='</div>';
+    $('#markout').innerHTML=h;
+  }catch(e){ $('#markout').innerHTML=`<div class="card"><div class="empty">${esc(String(e))}</div></div>`; }
+}
+
+/* ── Wiring for the new views ──────────────────────────────────────── */
+document.addEventListener('click',e=>{
+  const p=e.target.closest('[data-prod]');
+  if(p){ $('#prodq').value=p.dataset.prod; showTimeline(p.dataset.prod); return; }
+  const o=e.target.closest('.opt');
+  if(o){ PATHA[o.dataset.q]=o.dataset.v; renderPathQuestions(); return; }
+  const a=e.target.closest('[data-askhint]');
+  if(a){ $$('.tab').find(x=>x.dataset.view==='ask').click(); ask(a.dataset.askhint); return; }
+  if(e.target.closest('[data-print]')){ window.print(); return; }
+});
+$('#prodgo').onclick=()=>showTimeline($('#prodq').value);
+$('#prodq').addEventListener('keydown',e=>{if(e.key==='Enter')showTimeline($('#prodq').value);});
+$('#pathgo').onclick=showPathway;
+$('#pathreset').onclick=()=>{PATHA={};renderPathQuestions();$('#pathout').innerHTML='';};
+$('#markgo').onclick=()=>decodeMark($('#markq').value);
+$('#markq').addEventListener('keydown',e=>{if(e.key==='Enter')decodeMark($('#markq').value);});
+
+applyLang(); loadHealth(); setInterval(loadHealth,30000);
+</script>
+</body>
+</html>

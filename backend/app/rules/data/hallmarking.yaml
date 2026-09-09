@@ -1,0 +1,36 @@
+code: HALLMARKING
+name: "Gold/Silver Hallmarking (BIS Hallmark)"
+description: >
+  Registration for jewellers to sell hallmarked gold and silver jewellery,
+  and the per-article hallmarking process performed at an Assaying &
+  Hallmarking Centre (AHC), certifying purity/fineness.
+product_keywords:
+  - gold
+  - silver
+  - jewellery
+  - jeweller
+  - hallmark
+  - huid
+  - ornament
+mandatory: true
+fees:
+  - category: "Jeweller registration fee"
+    fee_inr: 2000
+    unit: "one-time (varies by number of showrooms)"
+  - category: "Per-article hallmarking charge"
+    fee_inr: 45
+    unit: "per article (gold), charged by the AHC"
+timeline_days: 15
+validity_years: 5
+required_documents:
+  - name: "Shop/showroom registration proof (GST/Udyam/trade licence)"
+    required: true
+  - name: "PAN and identity proof of the jeweller/firm"
+    required: true
+  - name: "Sample jewellery articles for the registration inspection"
+    required: false
+source_note: >
+  Illustrative placeholder values pending verified BIS circulars — confirm
+  fees, timelines and document requirements directly with BIS before acting
+  on them. Per-article hallmarking charges are set by BIS and revised
+  periodically; verify the current rate list on the BIS website.

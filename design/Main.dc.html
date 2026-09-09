@@ -1,0 +1,203 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Devanagari:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+  <style>
+    body { margin:0; background:#f6f5f2;
+      font-family:"IBM Plex Sans","Segoe UI",system-ui,sans-serif; color:#12182b; }
+    a { color:#1e3a8a; } a:hover { color:#c2410c; }
+    * { box-sizing:border-box; }
+  </style>
+</helmet>
+
+<div style="width:1440px; height:900px; display:flex; flex-direction:column; background:#f6f5f2">
+
+  <!-- Masthead: institutional band, not a SaaS navbar -->
+  <div style="display:flex; align-items:center; gap:18px; padding:0 40px; height:72px;
+              background:#0f1b3d; color:#fff; border-bottom:3px solid #c2410c">
+    <div style="display:flex; align-items:center; gap:13px; flex-grow:1">
+      <div style="width:38px; height:38px; border:1.5px solid rgba(255,255,255,.35);
+                  display:grid; place-items:center; font-family:'IBM Plex Serif',serif;
+                  font-size:17px; font-weight:600; letter-spacing:.5px">MS</div>
+      <div>
+        <div style="font-family:'IBM Plex Serif',Georgia,serif; font-size:19px; font-weight:600;
+                    letter-spacing:.2px; line-height:1.15">Manak Sahayak</div>
+        <div style="font-size:11px; color:#9fb0d4; letter-spacing:.06em; text-transform:uppercase;
+                    margin-top:2px">Indian Standards &middot; Bureau of Indian Standards</div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:10px; font-size:11.5px; color:#c3d0ea">
+      <div style="display:flex; align-items:center; gap:7px; padding:6px 12px;
+                  border:1px solid rgba(255,255,255,.16); border-radius:2px">
+        <span style="width:6px; height:6px; border-radius:50%; background:#34d399"></span>
+        <span><b style="color:#fff; font-weight:600">240</b> documents</span>
+      </div>
+      <div style="padding:6px 12px; border:1px solid rgba(255,255,255,.16); border-radius:2px">
+        <b style="color:#fff; font-weight:600">5,937</b> passages
+      </div>
+      <div style="padding:6px 12px; border:1px solid rgba(255,255,255,.16); border-radius:2px">
+        हिन्दी / EN
+      </div>
+    </div>
+  </div>
+
+  <!-- Section tabs -->
+  <div style="display:flex; gap:0; padding:0 40px; background:#fff; border-bottom:1px solid #dfdcd4">
+    <div style="padding:14px 20px; font-size:13.5px; font-weight:600; color:#0f1b3d;
+                border-bottom:2px solid #c2410c">Ask</div>
+    <div style="padding:14px 20px; font-size:13.5px; font-weight:500; color:#6b7280">Compliance timeline</div>
+    <div style="padding:14px 20px; font-size:13.5px; font-weight:500; color:#6b7280">Which scheme applies</div>
+    <div style="padding:14px 20px; font-size:13.5px; font-weight:500; color:#6b7280">Check a mark</div>
+  </div>
+
+  <!-- Body: answer + evidence rail -->
+  <div style="display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:28px;
+              padding:28px 40px; flex-grow:1; min-height:0">
+
+    <!-- Answer column -->
+    <div style="grid-column:span 8; display:flex; flex-direction:column; gap:16px; min-width:0">
+
+      <div style="display:flex; justify-content:flex-end">
+        <div style="background:#0f1b3d; color:#fff; padding:11px 17px; border-radius:2px;
+                    font-size:14.5px; max-width:78%">
+          On what grounds can BIS cancel a licence?
+        </div>
+      </div>
+
+      <div style="background:#fff; border:1px solid #dfdcd4; border-left:3px solid #047857;
+                  padding:22px 26px">
+
+        <!-- Verification strip: the thing that separates this from a chatbot -->
+        <div style="display:flex; align-items:center; gap:10px; padding-bottom:14px;
+                    border-bottom:1px solid #eeece6; margin-bottom:16px">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#047857"
+               stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3l7 3v6c0 4.2-2.9 7.6-7 9-4.1-1.4-7-4.8-7-9V6z"/>
+            <path d="M9 12l2 2 4-4"/>
+          </svg>
+          <span style="font-size:12.5px; font-weight:600; color:#047857; letter-spacing:.02em">
+            Verified against 3 BIS documents
+          </span>
+          <span style="flex-grow:1"></span>
+          <span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#9a958a;
+                       letter-spacing:.04em">HYBRID &middot; BM25 + BGE-M3</span>
+        </div>
+
+        <div style="font-size:15px; line-height:1.72; color:#12182b">
+          <p style="margin:0 0 13px">Under Regulation&nbsp;11 of the BIS (Conformity Assessment)
+          Regulations,&nbsp;2018, the Bureau may cancel a licence after giving not less than
+          twenty-one days' notice, on two grounds<span style="color:#c2410c; font-weight:600; font-size:11.5px; vertical-align:2px; font-family:'IBM Plex Mono',monospace">&nbsp;S1</span></p>
+
+          <div style="border-left:2px solid #e6e3db; padding:2px 0 2px 18px; margin:0 0 15px;
+                      display:flex; flex-direction:column; gap:9px">
+            <div style="display:flex; gap:11px; font-size:14.5px">
+              <span style="font-family:'IBM Plex Mono',monospace; color:#9a958a; font-size:12.5px;
+                           padding-top:2px">(a)</span>
+              <span>the licensee <b style="font-weight:600">fails to comply with any of the
+              conditions of the licence</b>;</span>
+            </div>
+            <div style="display:flex; gap:11px; font-size:14.5px">
+              <span style="font-family:'IBM Plex Mono',monospace; color:#9a958a; font-size:12.5px;
+                           padding-top:2px">(b)</span>
+              <span>the licence <b style="font-weight:600">has been issued in error</b>.</span>
+            </div>
+          </div>
+
+          <p style="margin:0 0 13px">A licence may also be cancelled <b style="font-weight:600">without
+          further notice</b> where it has been under suspension for more than one year, or where the
+          licensee requests cancellation<span style="color:#c2410c; font-weight:600; font-size:11.5px; vertical-align:2px; font-family:'IBM Plex Mono',monospace">&nbsp;S1</span></p>
+
+          <div style="background:#fdf8f3; border:1px solid #f0e2d4; padding:12px 15px;
+                      display:flex; gap:11px; align-items:flex-start">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c2410c"
+                 stroke-width="2" stroke-linecap="round" style="flex:none; margin-top:2px">
+              <circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16v.01"/>
+            </svg>
+            <span style="font-size:13px; line-height:1.6; color:#5c4632">
+              The twenty-one day notice is a <b style="font-weight:600">procedural requirement</b>,
+              not an independent ground for cancellation. Suspension, stop-marking and prosecution
+              are separate actions<span style="font-family:'IBM Plex Mono',monospace; color:#c2410c; font-weight:600; font-size:11px; vertical-align:2px">&nbsp;S2</span>
+            </span>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:8px; margin-top:20px; padding-top:16px;
+                    border-top:1px solid #eeece6">
+          <div style="border:1px solid #dfdcd4; padding:6px 13px; font-size:12px; color:#4b5563;
+                      background:#fafaf8">Copy</div>
+          <div style="border:1px solid #dfdcd4; padding:6px 13px; font-size:12px; color:#4b5563;
+                      background:#fafaf8">Read aloud</div>
+          <div style="border:1px solid #dfdcd4; padding:6px 13px; font-size:12px; color:#4b5563;
+                      background:#fafaf8">Export PDF</div>
+        </div>
+      </div>
+
+      <!-- Composer -->
+      <div style="margin-top:auto; display:flex; align-items:center; gap:12px; background:#fff;
+                  border:1px solid #cfcabe; padding:13px 16px">
+        <span style="font-size:14.5px; color:#a3a094; flex-grow:1">Ask about a standard, licence,
+        QCO or hallmark&hellip;</span>
+        <div style="display:flex; align-items:center; gap:7px; font-size:11.5px; color:#6b7280">
+          <span style="width:15px; height:15px; border:1px solid #cfcabe"></span> Offline
+        </div>
+        <div style="background:#c2410c; color:#fff; padding:9px 22px; font-size:13.5px;
+                    font-weight:600; letter-spacing:.01em">Ask</div>
+      </div>
+    </div>
+
+    <!-- Evidence rail -->
+    <div style="grid-column:span 4; display:flex; flex-direction:column; gap:12px; min-width:0">
+      <div style="font-size:10.5px; font-weight:600; letter-spacing:.11em; text-transform:uppercase;
+                  color:#8b8578">Evidence</div>
+
+      <div style="background:#fff; border:1px solid #dfdcd4; padding:15px 17px">
+        <div style="display:flex; gap:9px; align-items:baseline">
+          <span style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; font-weight:500;
+                       color:#c2410c">S1</span>
+          <span style="font-size:13.5px; font-weight:600; line-height:1.4">BIS (Conformity
+          Assessment) Regulations, 2018</span>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#8b8578;
+                    margin-top:7px; line-height:1.5; word-break:break-all">
+          10_BIS_ORGANIZATION/CONFORMITY_ASSESSMENT/<br>BIS_CA_12032019.pdf &middot; page 237
+        </div>
+        <div style="margin-top:11px; padding:11px 13px; background:#faf9f6; border:1px solid #eeece6;
+                    font-size:12.5px; line-height:1.65; color:#3f4657">
+          &ldquo;The Bureau may by order in writing cancel the licence after giving a notice of not
+          less than twenty one days, if&nbsp;&mdash; (a) the licensee fails to comply with any of the
+          conditions of the licence; (b) the licence has been issued in error.&rdquo;
+        </div>
+      </div>
+
+      <div style="background:#fff; border:1px solid #dfdcd4; padding:15px 17px">
+        <div style="display:flex; gap:9px; align-items:baseline">
+          <span style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; font-weight:500;
+                       color:#c2410c">S2</span>
+          <span style="font-size:13.5px; font-weight:600; line-height:1.4">Dealing with
+          Unsatisfactory Performance</span>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#8b8578;
+                    margin-top:7px; line-height:1.5; word-break:break-all">
+          02_PRODUCT_CERTIFICATION/&hellip;/<br>Dealing-With-Unsatisfactory-Performance.pdf &middot; page 12
+        </div>
+        <div style="margin-top:11px; font-size:12px; color:#1e3a8a">Show the exact text</div>
+      </div>
+
+      <div style="border:1px dashed #cfcabe; padding:13px 16px; background:#fbfaf7">
+        <div style="font-size:12px; line-height:1.65; color:#6b6459">
+          Every factual sentence carries a source. If the indexed documents do not answer a
+          question, the assistant says so instead of guessing.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

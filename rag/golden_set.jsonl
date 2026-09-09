@@ -1,0 +1,24 @@
+// Retrieval golden set. Each case names the document that actually contains
+// the answer, verified by reading the indexed text — not an expected answer
+// string, which would itself be an unverified claim about what the law says.
+// Questions are phrased the way a user would ask them, deliberately NOT as the
+// keyword queries used to locate the documents, so the eval measures real
+// retrieval rather than string overlap.
+{"question": "On what grounds can BIS cancel a licence that has already been granted?", "expect_doc": "Scheme-10.pdf", "note": "cancellation grounds incl. misuse, false declaration, suspension beyond one year"}
+{"question": "Who received the first all-India licence for carbon black and under which standard?", "expect_doc": "IS-17440-AIF.pdf", "note": "AIF circular, IS 17440:2020"}
+{"question": "What does IS 17440 cover?", "expect_doc": "IS-17440-AIF.pdf", "note": "exact identifier lookup"}
+{"question": "How much does a jeweller have to pay the assaying and hallmarking centre for hallmarking gold?", "expect_doc": "Hallmarking-Regulations", "note": "Schedule IV hallmarking fees"}
+{"question": "How long does a CRS registration stay valid before it must be renewed?", "expect_doc": "06_CRS", "note": "CRS FAQ: registration valid two years"}
+{"question": "Are imported air conditioners for research and development exempt from the quality control order?", "expect_doc": "Air-Conditioner", "note": "proviso: 200 numbers per year for R&D"}
+{"question": "What is a HUID and how many characters does it have?", "expect_doc": "07_HALLMARKING", "note": "jeweller guidelines, six-digit HUID"}
+{"question": "What punishment can someone face for improperly using the Standard Mark?", "expect_doc": "BIS-Act-2016.pdf", "note": "BIS Act 2016 penalty provisions"}
+{"question": "How does a testing laboratory get recognised by BIS?", "expect_doc": "08_LABORATORY", "note": "Laboratory Recognition Scheme"}
+{"question": "What does an overseas manufacturer need to submit to get BIS certification?", "expect_doc": "05_FMCS", "note": "FMCS application checklist"}
+{"question": "Which quality control order applies to toys?", "expect_doc": "Toys", "note": "Toys QCO and amendments"}
+{"question": "What are the conformity assessment regulations that govern BIS certification?", "expect_doc": "10_BIS_ORGANIZATION", "note": "BIS (Conformity Assessment) Regulations 2018"}
+// Cross-lingual: Hindi questions whose answers exist only as English text.
+// These are the cases that prove multilingual retrieval actually works.
+{"question": "बीआईएस लाइसेंस किन कारणों से रद्द किया जा सकता है?", "expect_doc": "Scheme-10.pdf", "language": "hi", "note": "Hindi form of the cancellation question"}
+{"question": "हॉलमार्किंग के लिए ज्वैलर को कितना शुल्क देना होता है?", "expect_doc": "07_HALLMARKING", "language": "hi", "note": "Hindi form of the hallmarking fee question"}
+{"question": "मानक चिह्न के दुरुपयोग पर क्या दंड है?", "expect_doc": "BIS-Act-2016.pdf", "language": "hi", "note": "Hindi form of the penalty question"}
+{"question": "खिलौनों के लिए कौन सा गुणवत्ता नियंत्रण आदेश लागू होता है?", "expect_doc": "Toys", "language": "hi", "note": "Hindi form of the toys QCO question"}

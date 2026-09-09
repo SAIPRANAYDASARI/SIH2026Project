@@ -1,0 +1,10 @@
+{"query": "What is IS 15111 about?", "expected_is_numbers": ["IS 15111"]}
+{"query": "Which IS number covers LED luminaires?", "expected_is_numbers": ["IS 15111"]}
+{"query": "What does clause 4.2.1 of IS 15111 require?", "expected_is_numbers": ["IS 15111"]}
+{"query": "I make electric immersion water heaters, which standard applies to my product?", "expected_is_numbers": ["IS 302"]}
+{"query": "What safety requirements apply to a domestic pressure cooker?", "expected_is_numbers": ["IS 2347"]}
+{"query": "Is a motorcycle helmet covered under a compulsory Indian Standard?", "expected_is_numbers": ["IS 4151"]}
+{"query": "What is the purity marking standard for 22 carat gold jewellery?", "expected_is_numbers": ["IS 1417"]}
+{"query": "Which standard governs portable fire extinguishers?", "expected_is_numbers": ["IS 2190"]}
+{"query": "What does IS 302 say about earthing requirements?", "expected_is_numbers": ["IS 302"]}
+{"query": "What is the applicable standard for LPG cylinders used domestically?", "expected_is_numbers": ["IS 3196"]}

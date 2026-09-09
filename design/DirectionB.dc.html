@@ -1,0 +1,195 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin:0; background:#0d1117;
+      font-family:"IBM Plex Sans","Segoe UI",system-ui,sans-serif; color:#e6edf3; }
+    a { color:#79c0ff; } a:hover { color:#ffa657; }
+    * { box-sizing:border-box; }
+  </style>
+</helmet>
+
+<div style="width:1440px; height:900px; display:flex; flex-direction:column; background:#0d1117">
+
+  <div style="display:flex; align-items:center; gap:16px; padding:0 26px; height:56px;
+              background:#161b22; border-bottom:1px solid #30363d">
+    <div style="display:flex; align-items:center; gap:11px; flex-grow:1">
+      <div style="width:28px; height:28px; background:#ffa657; color:#0d1117; display:grid;
+                  place-items:center; font-family:'IBM Plex Mono',monospace; font-size:13px;
+                  font-weight:600">MS</div>
+      <div style="font-size:14.5px; font-weight:600; letter-spacing:-.1px">Manak Sahayak</div>
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#7d8590;
+                  border-left:1px solid #30363d; padding-left:11px">BIS compliance intelligence</div>
+    </div>
+    <div style="display:flex; gap:7px; font-family:'IBM Plex Mono',monospace; font-size:11px">
+      <span style="color:#7d8590">corpus</span>
+      <span style="color:#e6edf3">240 docs</span>
+      <span style="color:#30363d">/</span>
+      <span style="color:#e6edf3">5,937 chunks</span>
+      <span style="color:#30363d">/</span>
+      <span style="color:#3fb950">● online</span>
+    </div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:1px;
+              flex-grow:1; min-height:0; background:#30363d">
+
+    <!-- Left: query + retrieval trace -->
+    <div style="grid-column:span 3; background:#0d1117; padding:20px 18px; display:flex;
+                flex-direction:column; gap:18px; min-width:0">
+      <div>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:#7d8590;
+                    letter-spacing:.12em; text-transform:uppercase; margin-bottom:9px">Retriever</div>
+        <div style="display:flex; flex-direction:column; gap:6px">
+          <div style="display:flex; align-items:center; gap:9px; padding:8px 11px;
+                      background:#161b22; border:1px solid #ffa657">
+            <span style="width:7px; height:7px; background:#ffa657"></span>
+            <span style="font-size:12.5px; font-weight:500">Hybrid</span>
+            <span style="flex-grow:1"></span>
+            <span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#7d8590">RRF</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:9px; padding:8px 11px;
+                      background:#161b22; border:1px solid #30363d; color:#7d8590">
+            <span style="width:7px; height:7px; background:#30363d"></span>
+            <span style="font-size:12.5px">Semantic</span>
+            <span style="flex-grow:1"></span>
+            <span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px">BGE-M3</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:9px; padding:8px 11px;
+                      background:#161b22; border:1px solid #30363d; color:#7d8590">
+            <span style="width:7px; height:7px; background:#30363d"></span>
+            <span style="font-size:12.5px">Keyword</span>
+            <span style="flex-grow:1"></span>
+            <span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px">BM25</span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:#7d8590;
+                    letter-spacing:.12em; text-transform:uppercase; margin-bottom:9px">
+          Retrieval trace</div>
+        <div style="display:flex; flex-direction:column; gap:5px; font-family:'IBM Plex Mono',monospace;
+                    font-size:10.5px">
+          <div style="display:flex; gap:8px; align-items:center">
+            <span style="color:#3fb950; width:34px">0.746</span>
+            <div style="height:3px; background:#3fb950; width:100px"></div>
+            <span style="color:#7d8590">p.237</span>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center">
+            <span style="color:#3fb950; width:34px">0.690</span>
+            <div style="height:3px; background:#2ea043; width:84px"></div>
+            <span style="color:#7d8590">p.12</span>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center">
+            <span style="color:#d29922; width:34px">0.651</span>
+            <div style="height:3px; background:#d29922; width:66px"></div>
+            <span style="color:#7d8590">p.290</span>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center; opacity:.45">
+            <span style="width:34px">0.402</span>
+            <div style="height:3px; background:#484f58; width:22px"></div>
+            <span style="color:#7d8590">cut-off</span>
+          </div>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:#7d8590;
+                    margin-top:10px; line-height:1.6; border-top:1px solid #21262d; padding-top:9px">
+          floor 0.50 &middot; 8 of 60 kept
+        </div>
+      </div>
+    </div>
+
+    <!-- Centre: answer -->
+    <div style="grid-column:span 6; background:#0d1117; padding:22px 24px; display:flex;
+                flex-direction:column; gap:16px; min-width:0">
+      <div style="font-size:15px; color:#7d8590">
+        <span style="font-family:'IBM Plex Mono',monospace; color:#ffa657">&gt;</span>
+        On what grounds can BIS cancel a licence?
+      </div>
+
+      <div style="display:flex; align-items:center; gap:9px; font-family:'IBM Plex Mono',monospace;
+                  font-size:10.5px">
+        <span style="background:#0f2f1c; color:#3fb950; border:1px solid #2ea043; padding:3px 9px">
+          ✓ GROUNDED</span>
+        <span style="color:#7d8590">3 sources</span>
+        <span style="color:#30363d">|</span>
+        <span style="color:#7d8590">gpt-oss-20b</span>
+        <span style="color:#30363d">|</span>
+        <span style="color:#7d8590">18.4s</span>
+      </div>
+
+      <div style="font-size:14.5px; line-height:1.75; color:#e6edf3">
+        <p style="margin:0 0 12px">Under Regulation 11 of the BIS (Conformity Assessment)
+        Regulations, 2018, the Bureau may cancel a licence after not less than twenty-one days'
+        notice, on two grounds
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#ffa657;
+                     border:1px solid #3d2f1f; background:#1c1409; padding:1px 5px">S1</span></p>
+
+        <div style="border-left:2px solid #30363d; padding-left:16px; display:flex;
+                    flex-direction:column; gap:8px; margin-bottom:13px">
+          <div style="display:flex; gap:10px"><span style="font-family:'IBM Plex Mono',monospace;
+            color:#7d8590; font-size:12px">(a)</span><span>the licensee fails to comply with any of
+            the conditions of the licence;</span></div>
+          <div style="display:flex; gap:10px"><span style="font-family:'IBM Plex Mono',monospace;
+            color:#7d8590; font-size:12px">(b)</span><span>the licence has been issued in
+            error.</span></div>
+        </div>
+
+        <div style="background:#1c1409; border:1px solid #3d2f1f; padding:11px 14px; font-size:13px;
+                    line-height:1.65; color:#d9b48f">
+          The twenty-one day notice is a <b style="font-weight:600; color:#ffa657">procedural
+          requirement</b>, not an independent ground.
+          <span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#ffa657">S2</span>
+        </div>
+      </div>
+
+      <div style="margin-top:auto; display:flex; gap:10px; align-items:center; background:#161b22;
+                  border:1px solid #30363d; padding:11px 14px">
+        <span style="font-family:'IBM Plex Mono',monospace; color:#ffa657; font-size:13px">&gt;</span>
+        <span style="font-size:14px; color:#484f58; flex-grow:1">query&hellip;</span>
+        <span style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#7d8590;
+                     border:1px solid #30363d; padding:4px 9px">⏎</span>
+      </div>
+    </div>
+
+    <!-- Right: sources -->
+    <div style="grid-column:span 3; background:#0d1117; padding:20px 18px; display:flex;
+                flex-direction:column; gap:11px; min-width:0">
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:#7d8590;
+                  letter-spacing:.12em; text-transform:uppercase">Sources</div>
+
+      <div style="background:#161b22; border:1px solid #30363d; border-left:2px solid #ffa657;
+                  padding:12px 14px">
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#ffa657">S1</div>
+        <div style="font-size:12.5px; font-weight:500; margin-top:5px; line-height:1.45">
+          BIS (Conformity Assessment) Regulations, 2018</div>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:#7d8590;
+                    margin-top:6px; word-break:break-all; line-height:1.5">
+          BIS_CA_12032019.pdf : 237</div>
+        <div style="margin-top:9px; padding:9px 11px; background:#0d1117; border:1px solid #21262d;
+                    font-size:11.5px; line-height:1.6; color:#adbac7">
+          &ldquo;&hellip;cancel the licence after giving a notice of not less than twenty one days,
+          if &mdash; (a) the licensee fails to comply&hellip;&rdquo;</div>
+      </div>
+
+      <div style="background:#161b22; border:1px solid #30363d; border-left:2px solid #30363d;
+                  padding:12px 14px">
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#7d8590">S2</div>
+        <div style="font-size:12.5px; font-weight:500; margin-top:5px; line-height:1.45">
+          Dealing with Unsatisfactory Performance</div>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:#7d8590;
+                    margin-top:6px; word-break:break-all">Dealing-With-Unsat&hellip;.pdf : 12</div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

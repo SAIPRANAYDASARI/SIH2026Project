@@ -1,0 +1,19 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html",       "x": 0,    "y": 0,    "w": 1440, "h": 900,
+      "title": "A — Institutional editorial (leading)" },
+    { "file": "Timeline.dc.html",   "x": 1560, "y": 0,    "w": 1440, "h": 900,
+      "title": "A — Compliance timeline" },
+    { "file": "DirectionB.dc.html", "x": 0,    "y": 1060, "w": 1440, "h": 900,
+      "title": "B — Operator console (alternate)" }
+  ],
+  "annotations": [
+    { "id": "brief", "x": 0, "y": -190, "w": 700,
+      "text": "Manak Sahayak — UI directions\n\nBoth use the app's real tokens (navy #1e3a8a, burnt orange #c2410c, slate ink) and real content: verified Regulation 11 text from BIS_CA_12032019.pdf p.237 and the real Air Conditioner amendment chain." },
+    { "id": "note-a", "x": 1560, "y": -190, "w": 560,
+      "text": "A — Institutional editorial\nReads as a standards authority, not a chatbot. IBM Plex Serif masthead, gazette-like evidence rail, verification strip above the answer.\n\nTradeoff: calmer, less obviously 'AI'." },
+    { "id": "note-b", "x": 0, "y": 2000, "w": 560,
+      "text": "B — Operator console\nShows the machinery: live retrieval scores, the 0.50 relevance floor, which retriever ran.\n\nTradeoff: impressive to technical judges, heavier for a first-time user." }
+  ],
+  "launch": { "view": "canvas" }
+}

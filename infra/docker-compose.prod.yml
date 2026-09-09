@@ -1,0 +1,155 @@
+# Production stack (Step 13). Differences from infra/docker-compose.yml
+# (the Step 1 dev stack):
+#   - backend/frontend built from their Dockerfiles' `production` stage,
+#     not `development` — no hot reload, no bind-mounted source.
+#   - the frontend image is Nginx serving the built static SPA, with
+#     `infra/nginx/nginx.conf` mounted in to get SSE-safe proxying (see
+#     that file's header comment for why this matters specifically for
+#     the streaming chat endpoint).
+#   - no host port bindings on Postgres/Redis — only Nginx (80) and, if
+#     you terminate TLS elsewhere, the backend's 8000 are meant to be
+#     reachable from outside the Docker network.
+#   - `SEED_DEMO_DATA=true` runs the Step 13 seeding script once via the
+#     `seed` one-shot service so a fresh deployment has something to demo
+#     immediately (all seeded rows are flagged `is_seed_data=true` — see
+#     docs/RUNBOOK.md's "Offline / demo mode" section — and are safe to
+#     wipe before going live with real data).
+#   - `LLM_BACKEND=ollama` by default here specifically to demonstrate the
+#     brief's "fully offline, data-sovereign deployment mode" (decision #3,
+#     docs/DECISIONS.md) — override to `hosted` in `.env` if you'd rather
+#     run the demo against a hosted LLM.
+
+name: manak-sahayak-prod
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-manak_sahayak}
+      POSTGRES_USER: ${POSTGRES_USER:-manak}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-manak} -d ${POSTGRES_DB:-manak_sahayak}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    volumes:
+      - ollama_data:/root/.ollama
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        ollama serve &
+        sleep 3
+        ollama pull ${OLLAMA_MODEL:-llama3.1:8b} || true
+        ollama pull ${OLLAMA_EMBEDDING_MODEL:-bge-m3} || true
+        wait
+
+  reranker:
+    image: michaelf34/infinity:latest
+    restart: unless-stopped
+    volumes:
+      - reranker_data:/app/.cache
+    command: >
+      v2 --model-id BAAI/bge-reranker-v2-m3 --port 7997
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7997/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 60s
+
+  backend:
+    build:
+      context: ../backend
+      target: production
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      POSTGRES_HOST: postgres
+      REDIS_HOST: redis
+      OLLAMA_BASE_URL: http://ollama:11434
+      RERANKER_BASE_URL: http://reranker:7997
+      APP_ENV: production
+    volumes:
+      - blob_data:/data/blobs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2"
+
+  seed:
+    build:
+      context: ../backend
+      target: production
+    env_file:
+      - ../.env
+    environment:
+      POSTGRES_HOST: postgres
+      REDIS_HOST: redis
+      APP_ENV: production
+    depends_on:
+      backend:
+        condition: service_started
+    # One-shot: runs the seeding script (no-op unless SEED_DEMO_DATA=true)
+    # and exits. `restart: "no"` so it doesn't loop.
+    restart: "no"
+    command: >
+      sh -c "python -m app.db.seed"
+
+  worker:
+    build:
+      context: ..
+      dockerfile: worker/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      POSTGRES_HOST: postgres
+      REDIS_HOST: redis
+      OLLAMA_BASE_URL: http://ollama:11434
+      APP_ENV: production
+    volumes:
+      - blob_data:/data/blobs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ../frontend
+      target: production
+    restart: unless-stopped
+    volumes:
+      - ../infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  ollama_data:
+  reranker_data:
+  blob_data:

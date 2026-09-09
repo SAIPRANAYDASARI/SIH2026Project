@@ -1,0 +1,26 @@
+{"query": "What is IS 15111 about?", "audience": "consumer", "expected_intent": "standard_lookup", "expects_citation": true}
+{"query": "What does clause 4.2.1 of IS 15111 require?", "audience": "industry", "expected_intent": "standard_lookup", "expects_citation": true}
+{"query": "What is the scope of IS 302 part 1?", "audience": "industry", "expected_intent": "standard_lookup", "expects_citation": true}
+{"query": "Which IS number covers LED luminaires?", "audience": "consumer", "expected_intent": "product_to_standard", "expects_citation": true}
+{"query": "I make electric immersion water heaters, which standard applies to my product?", "audience": "industry", "expected_intent": "product_to_standard", "expects_citation": true}
+{"query": "What safety requirements apply to a domestic pressure cooker?", "audience": "consumer", "expected_intent": "product_to_standard", "expects_citation": true}
+{"query": "Is a motorcycle helmet covered under a compulsory Indian Standard?", "audience": "consumer", "expected_intent": "product_to_standard", "expects_citation": true}
+{"query": "Which standard governs portable fire extinguishers?", "audience": "industry", "expected_intent": "product_to_standard", "expects_citation": true}
+{"query": "What is the applicable standard for LPG cylinders used domestically?", "audience": "consumer", "expected_intent": "product_to_standard", "expects_citation": true}
+{"query": "Do I need a CRS registration to sell power banks in India?", "audience": "industry", "expected_intent": "scheme_eligibility", "expects_citation": true}
+{"query": "What certification scheme applies to gold jewellery sold in my shop?", "audience": "industry", "expected_intent": "scheme_eligibility", "expects_citation": true}
+{"query": "Which BIS scheme should a foreign manufacturer of toys apply for?", "audience": "industry", "expected_intent": "scheme_eligibility", "expects_citation": true}
+{"query": "Is Eco Mark mandatory for detergent manufacturers?", "audience": "industry", "expected_intent": "scheme_eligibility", "expects_citation": true}
+{"query": "How do I apply for an ISI licence for my cement factory?", "audience": "industry", "expected_intent": "process_howto", "expects_citation": true}
+{"query": "What documents are needed to register under the Compulsory Registration Scheme?", "audience": "industry", "expected_intent": "process_howto", "expects_citation": true}
+{"query": "What is the process to get gold jewellery hallmarked?", "audience": "consumer", "expected_intent": "process_howto", "expects_citation": true}
+{"query": "How long does it take to get an FMCS licence?", "audience": "industry", "expected_intent": "process_howto", "expects_citation": true}
+{"query": "Is CML number 1234567 a valid and active licence?", "audience": "consumer", "expected_intent": "verification", "expects_citation": false}
+{"query": "How can I check if a HUID stamped on my jewellery is genuine?", "audience": "consumer", "expected_intent": "verification", "expects_citation": true}
+{"query": "Verify CRS registration R-998877 for me.", "audience": "industry", "expected_intent": "verification", "expects_citation": false}
+{"query": "I bought a pressure cooker without an ISI mark, is it safe to use?", "audience": "consumer", "expected_intent": "consumer_safety", "expects_citation": true}
+{"query": "How do I file a complaint about a fake ISI mark on an electrical appliance?", "audience": "consumer", "expected_intent": "consumer_safety", "expects_citation": true}
+{"query": "What should I do if a shopkeeper sells jewellery without hallmarking?", "audience": "consumer", "expected_intent": "consumer_safety", "expects_citation": true}
+{"query": "What's the weather like in Delhi today?", "audience": "consumer", "expected_intent": "out_of_scope", "expects_citation": false, "expects_refusal": true}
+{"query": "Can you help me write a poem about the Taj Mahal?", "audience": "consumer", "expected_intent": "out_of_scope", "expects_citation": false, "expects_refusal": true}
+{"query": "What is the boiling point of water on Mars?", "audience": "consumer", "expected_intent": "out_of_scope", "expects_citation": false, "expects_refusal": true}
