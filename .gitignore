@@ -40,3 +40,4 @@ worker/data/blobs/
 .vscode/*
 !.vscode/extensions.json
 .idea/
+.github/workflows/
