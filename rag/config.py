@@ -11,7 +11,7 @@ import os
 from pathlib import Path
 
 # Source corpus (read-only — the pipeline never writes into it).
-CORPUS_ROOT = Path(os.getenv("BIS_CORPUS_ROOT", r"C:\bisnew"))
+CORPUS_ROOT = Path(os.getenv("BIS_CORPUS_ROOT", r"C:\SIHPROJECT 2026\SIH2026Project\data_bis"))
 
 # Everything the pipeline produces.
 INDEX_DIR = Path(os.getenv("BIS_INDEX_DIR", str(Path(__file__).resolve().parent.parent / "rag_index")))
