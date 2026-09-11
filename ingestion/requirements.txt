@@ -1,8 +1,0 @@
-# Ingestion-only dependencies, layered on top of backend/requirements.txt
-# (this package imports app.core/app.db/app.models directly — see
-# ingestion/__init__.py). Installed into the worker image, which is the only
-# place crawlers actually run; also install into your local backend venv if
-# you want to run `python -m ingestion.cli` directly for interrogation.
-beautifulsoup4==4.12.3
-lxml==5.3.0
-pypdf==5.1.0
