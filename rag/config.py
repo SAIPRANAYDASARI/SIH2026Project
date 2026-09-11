@@ -55,6 +55,20 @@ MIN_PAGE_CHARS = 80
 # run locally and cost nothing, so these knobs are the entire cost surface.
 LLM_MODEL = os.getenv("BIS_LLM_MODEL", "openai/gpt-oss-20b")
 LLM_BASE_URL = os.getenv("BIS_LLM_BASE_URL", "https://integrate.api.nvidia.com/v1")
+
+# Groq serves the SAME model (openai/gpt-oss-20b) on different hardware, and
+# is tried first because the difference is not subtle: measured end to end on
+# this corpus, NVIDIA's shared free tier answered identical prompts anywhere
+# between 9s and 250s, and the slow tail crossed the request timeout often
+# enough that real questions degraded to raw quoted passages. Same weights,
+# same prompt, same citation behaviour — just served fast enough that queue
+# latency stops being the dominant failure mode.
+#
+# NVIDIA stays configured as the fallback rather than being replaced: Groq's
+# free tier is capped per-minute (8k tokens) and per-day (200k), so a busy
+# demo can exhaust it, and a slow answer beats no answer.
+GROQ_BASE_URL = os.getenv("BIS_GROQ_BASE_URL", "https://api.groq.com/openai/v1")
+GROQ_MODEL = os.getenv("BIS_GROQ_MODEL", "openai/gpt-oss-20b")
 # gpt-oss-20b is a reasoning model: part of this budget is spent on hidden
 # chain-of-thought before it writes the visible answer, so the budget has to
 # cover BOTH. 1200, then 1800, then 3000 all proved too tight — observed
@@ -134,3 +148,13 @@ def llm_api_key() -> str:
         return key
     env_path = Path(__file__).resolve().parent.parent / ".env"
     return load_env_file(env_path).get("HOSTED_LLM_API_KEY", "")
+
+
+def groq_api_key() -> str:
+    """Groq API key, or "" when none is configured — in which case the
+    provider is skipped entirely rather than attempted and failed."""
+    key = os.getenv("GROQ_API_KEY")
+    if key:
+        return key
+    env_path = Path(__file__).resolve().parent.parent / ".env"
+    return load_env_file(env_path).get("GROQ_API_KEY", "")

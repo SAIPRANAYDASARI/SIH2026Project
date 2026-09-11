@@ -69,6 +69,42 @@ CREATE VIRTUAL TABLE IF NOT EXISTS chunks_fts USING fts5(
 );
 
 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+
+-- HSN import/export compliance matrix. A lookup table, not prose to embed:
+-- almost every question against it is an exact code ("what documents for
+-- HSN 1011010?") or a product-name search, both of which a plain index
+-- answers exactly rather than by similarity. See rag/hsn.py.
+CREATE TABLE IF NOT EXISTS hsn_codes (
+    id                       INTEGER PRIMARY KEY,
+    hsn_cd                   TEXT NOT NULL,
+    level                    TEXT NOT NULL,
+    chapter                  TEXT,
+    chapter_title            TEXT,
+    heading                  TEXT,
+    product                  TEXT NOT NULL,
+    import_core_docs         TEXT,
+    import_bis_is            TEXT,
+    import_dgft_policy       TEXT,
+    import_licence_required  TEXT,
+    import_monitoring_system TEXT,
+    import_coo               TEXT,
+    import_other_noc         TEXT,
+    export_core_docs         TEXT,
+    export_dgft_policy       TEXT,
+    export_other_noc         TEXT,
+    primary_regulator        TEXT,
+    verify_against           TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_hsn_code ON hsn_codes(hsn_cd);
+
+CREATE VIRTUAL TABLE IF NOT EXISTS hsn_fts USING fts5(
+    product,
+    chapter_title,
+    heading,
+    content='hsn_codes',
+    content_rowid='id',
+    tokenize="unicode61 remove_diacritics 2"
+);
 """
 
 

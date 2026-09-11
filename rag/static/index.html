@@ -166,20 +166,12 @@ input.inline{flex:1 1 240px;padding:10px 13px;border:1px solid var(--line);borde
 input.inline:focus{border-color:var(--brand2)}
 
 /* Timeline */
-.tl{position:relative;margin:6px 0 0;padding-left:26px}
-.tl::before{content:"";position:absolute;left:8px;top:6px;bottom:6px;width:2px;background:var(--line)}
-.tlitem{position:relative;padding:12px 0 12px 4px}
-.tlitem::before{content:"";position:absolute;left:-22px;top:18px;width:11px;height:11px;
-  border-radius:50%;background:var(--brand2);border:2px solid var(--panel)}
-.tlitem.orig::before{background:var(--ok)}
-.tlitem.undated::before{background:var(--muted)}
-.tldate{font-weight:700;font-size:13px;font-variant-numeric:tabular-nums}
-.tlkind{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
-  color:var(--muted);margin-left:8px}
-.tlmeta{font-family:ui-monospace,Consolas,monospace;font-size:11px;color:var(--muted);margin-top:3px;
-  word-break:break-all}
-.gz{display:inline-block;background:color-mix(in srgb,var(--accent) 14%,transparent);
-  color:var(--accent);border-radius:5px;padding:1px 7px;font-size:11px;font-weight:700;margin-right:5px}
+
+
+
+
+
+
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin:0 0 16px}
 .kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;
   box-shadow:var(--shadow)}
@@ -264,9 +256,9 @@ input.inline,#q{border-radius:2px}
 .cite:hover{background:var(--accent);color:#fff}
 
 /* Timeline reads as a gazette record. */
-.tldate{font-family:"IBM Plex Mono",ui-monospace,monospace}
-.tlmeta{font-family:"IBM Plex Mono",ui-monospace,monospace}
-.gz{border-radius:2px;font-family:"IBM Plex Mono",ui-monospace,monospace}
+
+
+
 .kpi .n{font-family:"IBM Plex Serif",Georgia,serif;-webkit-text-fill-color:currentColor;
   background:none;color:var(--navy)}
 :root[data-theme="dark"] .kpi .n,
@@ -619,24 +611,8 @@ footer{ background:linear-gradient(to top, var(--bg) 58%, transparent); }
 :root:not([data-theme="light"]) .kpi .n{ text-shadow:0 1px 0 rgba(0,0,0,.6); }
 
 /* Timeline markers become physical studs on a milled rail. */
-.tl::before{
-  background:linear-gradient(180deg, rgba(24,20,10,.05), rgba(24,20,10,.16), rgba(24,20,10,.05));
-  width:3px; border-radius:2px;
-  box-shadow:inset 0 0 1px rgba(255,255,255,.6);
-}
-.tlitem::before{
-  background:radial-gradient(circle at 33% 28%, #fff 0%, var(--brass) 42%, var(--brass-lo) 100%);
-  box-shadow:0 1px 3px rgba(24,20,10,.4), inset 0 -1px 2px rgba(90,62,12,.5);
-  border:0;
-}
-.tlitem.orig::before{
-  background:radial-gradient(circle at 33% 28%, #d7f5e6 0%, #12a06e 45%, #04624a 100%);
-}
-.gz{
-  background:linear-gradient(180deg, rgba(176,133,47,.16), rgba(176,133,47,.06));
-  border:1px solid rgba(176,133,47,.38);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.6);
-}
+
+
 .step, .col, .opt{
   background:linear-gradient(180deg, #fff, var(--paper));
   box-shadow:var(--lift-1);
@@ -1050,21 +1026,11 @@ footer{ background:linear-gradient(to top, var(--c-canvas) 62%, transparent); pa
   background:none; -webkit-text-fill-color:currentColor; text-shadow:none;
 }
 .kpi .l{ color:var(--t-3); font-size:11px; }
-.tl::before{ background:var(--line-1); width:2px; box-shadow:none; }
-.tlitem::before{
-  background:var(--gold-grad); border:2px solid var(--c-canvas);
-  box-shadow:0 0 0 1px rgba(227,179,65,.3);
-}
-.tlitem.orig::before{ background:linear-gradient(180deg,#7BF0C0,var(--s-ok)); }
-.tlitem.undated::before{ background:var(--line-2); box-shadow:none; }
-.tldate{ color:var(--t-1); font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; }
-.tlkind{ color:var(--t-3); }
-.tlmeta{ color:var(--t-3); font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; }
-.gz{
-  background:rgba(227,179,65,.12); border:1px solid rgba(227,179,65,.26);
-  color:var(--gold); border-radius:6px; box-shadow:none;
-  font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
-}
+
+
+
+
+
 .step,.col{
   background:var(--e2); background-image:var(--sheen);
   border:1px solid var(--line-1); border-radius:var(--r-card);
@@ -1256,8 +1222,7 @@ header::after{
 .you div{ box-shadow:var(--hi-top), 0 6px 18px rgba(0,0,0,.35); }
 
 /* Timeline studs glow faintly. */
-.tlitem::before{ box-shadow:0 0 0 1px rgba(227,179,65,.3), 0 0 12px rgba(227,179,65,.35); }
-.tlitem.orig::before{ box-shadow:0 0 0 1px rgba(61,220,151,.35), 0 0 12px rgba(61,220,151,.35); }
+
 
 /* Tabs: the active pill throws a small gold pool downward. */
 .tab[aria-selected="true"]::after{
@@ -1290,7 +1255,6 @@ header::after{
   </div>
   <nav role="tablist" id="tabs">
     <button class="tab" role="tab" aria-selected="true"  data-view="ask"    data-t="tabAsk"></button>
-    <button class="tab" role="tab" aria-selected="false" data-view="time"   data-t="tabTime"></button>
     <button class="tab" role="tab" aria-selected="false" data-view="path"   data-t="tabPath"></button>
     <button class="tab" role="tab" aria-selected="false" data-view="verify" data-t="tabVerify"></button>
   </nav>
@@ -1305,19 +1269,6 @@ header::after{
       <div class="exwrap" id="examples"></div>
     </div>
     <div id="feed"></div>
-  </section>
-
-  <section class="view" id="v-time">
-    <div class="card intro">
-      <h2 data-t="timeH"></h2>
-      <p data-t="timeP"></p>
-      <div class="exwrap" id="prodlist"></div>
-      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
-        <input id="prodq" class="inline" type="text" />
-        <button class="go" id="prodgo" data-t="timePick"></button>
-      </div>
-    </div>
-    <div id="timeout"></div>
   </section>
 
   <section class="view" id="v-path">
@@ -1395,16 +1346,9 @@ const I18N={
   noVoice:'Speech is not available in this browser.',
   followH:'You might also ask', badcite:'removed invalid citation',
   err:'Something went wrong', unavailable:'Service unavailable',
-  tabAsk:'Ask', tabTime:'Compliance timeline', tabPath:'Which scheme applies?', tabVerify:'Check a mark',
-  timeH:'Trace a product’s regulatory history',
-  timeP:'A Quality Control Order is rarely one document. Pick a product to see its original order and every amendment and extension, in date order, with the gazette number for each.',
-  timePick:'Choose a product', timeSearch:'or type a product name…',
-  timeOrders:'orders', timeAmend:'amendments / extensions', timeUndated:'undated',
-  timeLatest:'Most recent order', timeNone:'No Quality Control Orders found for that product in the indexed corpus.',
-  kindOriginal:'Principal order', kindAmendment:'Amendment', kindExtension:'Extension', kindUnknown:'Order',
-  dateFrom:'date from', timeStandards:'Standards referenced',
-  pathH:'Find the scheme that applies to you', pathP:'Answer two questions. Every requirement shown is cited to a real BIS document.',
-  pathGo:'Show my pathway', pathPickAll:'Please answer both questions first.', pathScheme:'Applicable scheme', pathWhy:'Why this scheme',
+  tabAsk:'Ask', tabPath:'Which scheme applies?', tabVerify:'Check a mark',
+  pathH:'Find the scheme that applies to you', pathP:'For companies and consumers alike — Indian or foreign, selling here, importing or exporting. Every requirement shown is cited to a real BIS document.',
+  pathGo:'Show my pathway', pathPickAll:'Please answer all the questions first.', pathScheme:'Applicable scheme', pathWhy:'Why this scheme',
   pathSteps:'What the documents require', pathAgain:'Start over',
   verifyH:'Check a licence number, HUID or standard',
   verifyP:'Paste a BIS licence number (CM/L…), a six-character HUID from a hallmark, a CRS number (R…) or an Indian Standard number.',
@@ -1438,16 +1382,9 @@ const I18N={
   noVoice:'इस ब्राउज़र में वाणी उपलब्ध नहीं है।',
   followH:'आप यह भी पूछ सकते हैं', badcite:'अमान्य संदर्भ हटाया गया',
   err:'कुछ गड़बड़ हो गई', unavailable:'सेवा उपलब्ध नहीं है',
-  tabAsk:'प्रश्न', tabTime:'अनुपालन समयरेखा', tabPath:'कौन सी योजना लागू?', tabVerify:'चिह्न जाँचें',
-  timeH:'किसी उत्पाद का नियामक इतिहास देखें',
-  timeP:'गुणवत्ता नियंत्रण आदेश आमतौर पर एक दस्तावेज़ नहीं होता। उत्पाद चुनें और मूल आदेश सहित हर संशोधन और विस्तार तिथि-क्रम में देखें।',
-  timePick:'उत्पाद चुनें', timeSearch:'या उत्पाद का नाम लिखें…',
-  timeOrders:'आदेश', timeAmend:'संशोधन / विस्तार', timeUndated:'अदिनांकित',
-  timeLatest:'सबसे हाल का आदेश', timeNone:'इस उत्पाद के लिए कोई गुणवत्ता नियंत्रण आदेश नहीं मिला।',
-  kindOriginal:'मूल आदेश', kindAmendment:'संशोधन', kindExtension:'विस्तार', kindUnknown:'आदेश',
-  dateFrom:'तिथि का स्रोत', timeStandards:'संदर्भित मानक',
-  pathH:'आप पर लागू योजना जानें', pathP:'दो प्रश्नों के उत्तर दें। हर आवश्यकता का संदर्भ वास्तविक बीआईएस दस्तावेज़ से है।',
-  pathGo:'मेरा मार्ग दिखाएँ', pathPickAll:'कृपया पहले दोनों प्रश्नों के उत्तर दें।', pathScheme:'लागू योजना', pathWhy:'यह योजना क्यों',
+  tabAsk:'प्रश्न', tabPath:'कौन सी योजना लागू?', tabVerify:'चिह्न जाँचें',
+  pathH:'आप पर लागू योजना जानें', pathP:'कंपनियों और उपभोक्ताओं दोनों के लिए — भारतीय या विदेशी, भारत में बिक्री, आयात या निर्यात। हर आवश्यकता का संदर्भ वास्तविक बीआईएस दस्तावेज़ से है।',
+  pathGo:'मेरा मार्ग दिखाएँ', pathPickAll:'कृपया पहले सभी प्रश्नों के उत्तर दें।', pathScheme:'लागू योजना', pathWhy:'यह योजना क्यों',
   pathSteps:'दस्तावेज़ों के अनुसार आवश्यकताएँ', pathAgain:'फिर से शुरू करें',
   verifyH:'लाइसेंस नंबर, HUID या मानक जाँचें',
   verifyP:'बीआईएस लाइसेंस नंबर (CM/L…), हॉलमार्क का छह-अक्षरीय HUID, CRS नंबर (R…) या भारतीय मानक संख्या दर्ज करें।',
@@ -1505,7 +1442,6 @@ function applyLang(){
   $('#lang').textContent = LANG==='en' ? 'अ' : 'A';
   renderExamples();
   renderHealth();   // chips + hint are built in JS, so re-render them too
-  const pq=$('#prodq'); if(pq) pq.placeholder=t('timeSearch');
   const mq=$('#markq'); if(mq) mq.placeholder=t('verifyPh');
   if(typeof PATHQ!=='undefined' && PATHQ.length) renderPathQuestions();
   if(recog) recog.lang = LANG==='hi' ? 'hi-IN' : 'en-IN';
@@ -1837,61 +1773,8 @@ $$('.tab').forEach(b=>b.onclick=()=>{
   VIEW=b.dataset.view;
   $$('.view').forEach(v=>v.classList.toggle('on', v.id==='v-'+VIEW));
   document.querySelector('footer').style.display = VIEW==='ask' ? '' : 'none';
-  if(VIEW==='time' && !$('#prodlist').children.length) loadProducts();
   if(VIEW==='path' && !$('#pathq').children.length)   loadPathQuestions();
 });
-
-/* ── Compliance timeline ───────────────────────────────────────────── */
-async function loadProducts(){
-  try{
-    const d=await (await fetch('/products')).json();
-    $('#prodlist').innerHTML = d.products.slice(0,14).map(p=>
-      `<button class="ex" data-prod="${esc(p.name)}">${esc(p.name)} · ${p.orders}</button>`).join('');
-  }catch(e){}
-}
-
-function kindLabel(k){
-  return {original:t('kindOriginal'),amendment:t('kindAmendment'),
-          extension:t('kindExtension')}[k] || t('kindUnknown');
-}
-
-async function showTimeline(product){
-  if(!product||!product.trim()) return;
-  $('#timeout').innerHTML='<div class="card"><div class="empty"><span class="sp"></span></div></div>';
-  try{
-    const d=await (await fetch('/timeline',{method:'POST',
-      headers:{'Content-Type':'application/json'},body:JSON.stringify({product})})).json();
-    if(!d.order_count){
-      $('#timeout').innerHTML=`<div class="card"><div class="empty">${esc(t('timeNone'))}</div></div>`;
-      return;
-    }
-    let h=`<div class="kpis">
-      <div class="kpi"><div class="n">${d.order_count}</div><div class="l">${esc(t('timeOrders'))}</div></div>
-      <div class="kpi"><div class="n">${d.amendment_count}</div><div class="l">${esc(t('timeAmend'))}</div></div>
-      <div class="kpi"><div class="n">${d.undated_count}</div><div class="l">${esc(t('timeUndated'))}</div></div>
-    </div>`;
-    h+=`<div class="card" style="padding:18px 22px"><h3 style="margin:0 0 4px;font-size:17px">${esc(d.product)}</h3>`;
-    if(d.latest) h+=`<div style="font-size:12.5px;color:var(--muted)">${esc(t('timeLatest'))}: <b>${esc(d.latest.date)}</b> · ${esc(kindLabel(d.latest.kind))}</div>`;
-    if(d.standards&&d.standards.length)
-      h+=`<div style="font-size:12.5px;color:var(--muted);margin-top:4px">${esc(t('timeStandards'))}: ${d.standards.map(esc).join(', ')}</div>`;
-    h+='<div class="tl">';
-    d.orders.forEach(o=>{
-      const cls = o.kind==='original' ? 'orig' : (o.date ? '' : 'undated');
-      h+=`<div class="tlitem ${cls}">
-        <div><span class="tldate">${esc(o.date_label)}</span><span class="tlkind">${esc(kindLabel(o.kind))}</span></div>
-        <div style="margin-top:5px">${(o.gazette||[]).slice(0,2).map(g=>`<span class="gz">${esc(g)}</span>`).join('')}
-          ${(o.standards||[]).slice(0,3).map(x=>`<span class="badge">${esc(x)}</span>`).join('')}</div>
-        <div class="tlmeta">${esc(o.document)} · ${esc(t('page'))} ${o.page}
-          <span style="opacity:.7">· ${esc(t('dateFrom'))}: ${esc(o.date_source)}</span></div>
-      </div>`;
-    });
-    h+='</div>';
-    h+=`<div class="unverified" style="margin-top:14px">${esc(d.caveat)}</div>`;
-    h+=`<div class="tools"><button class="tool" data-print="1">${esc(t('print'))}</button></div>`;
-    h+='</div>';
-    $('#timeout').innerHTML=h;
-  }catch(e){ $('#timeout').innerHTML=`<div class="card"><div class="empty">${esc(String(e))}</div></div>`; }
-}
 
 /* ── Pathway ───────────────────────────────────────────────────────── */
 let PATHQ=[], PATHA={};
@@ -1901,15 +1784,26 @@ async function loadPathQuestions(){
     renderPathQuestions();
   }catch(e){}
 }
+// A question only applies once its show_when condition is satisfied — a
+// consumer is never asked where their factory is.
+function pathVisible(){
+  return PATHQ.filter(q=>!q.show_when ||
+    Object.entries(q.show_when).every(([k,vals])=>vals.includes(PATHA[k])));
+}
 function renderPathQuestions(){
-  $('#pathq').innerHTML = PATHQ.map(q=>`
+  const vis=pathVisible();
+  // Drop answers to questions that no longer apply, so switching sector does
+  // not leave a stale industry behind and send it to the server.
+  const live=new Set(vis.map(q=>q.key));
+  Object.keys(PATHA).forEach(k=>{ if(!live.has(k)) delete PATHA[k]; });
+  $('#pathq').innerHTML = vis.map(q=>`
     <div class="qblock"><h4>${esc(q.prompt[LANG]||q.prompt.en)}</h4><div class="opts">`+
     q.options.map(o=>`<button class="opt" data-q="${esc(q.key)}" data-v="${esc(o.value)}"
       aria-pressed="${PATHA[q.key]===o.value}">${esc(o.label[LANG]||o.label.en)}</button>`).join('')+
     '</div></div>').join('');
 }
 async function showPathway(){
-  if(Object.keys(PATHA).length < PATHQ.length){
+  if(pathVisible().some(q=>!PATHA[q.key])){
     $('#pathout').innerHTML=`<div class="card"><div class="empty">${esc(t('pathPickAll'))}</div></div>`;
     return;
   }
@@ -1966,15 +1860,12 @@ async function decodeMark(v){
 /* ── Wiring for the new views ──────────────────────────────────────── */
 document.addEventListener('click',e=>{
   const p=e.target.closest('[data-prod]');
-  if(p){ $('#prodq').value=p.dataset.prod; showTimeline(p.dataset.prod); return; }
   const o=e.target.closest('.opt');
   if(o){ PATHA[o.dataset.q]=o.dataset.v; renderPathQuestions(); return; }
   const a=e.target.closest('[data-askhint]');
   if(a){ $$('.tab').find(x=>x.dataset.view==='ask').click(); ask(a.dataset.askhint); return; }
   if(e.target.closest('[data-print]')){ window.print(); return; }
 });
-$('#prodgo').onclick=()=>showTimeline($('#prodq').value);
-$('#prodq').addEventListener('keydown',e=>{if(e.key==='Enter')showTimeline($('#prodq').value);});
 $('#pathgo').onclick=showPathway;
 $('#pathreset').onclick=()=>{PATHA={};renderPathQuestions();$('#pathout').innerHTML='';};
 $('#markgo').onclick=()=>decodeMark($('#markq').value);

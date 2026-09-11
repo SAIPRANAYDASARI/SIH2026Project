@@ -21,12 +21,16 @@ from __future__ import annotations
 
 import json
 import re
+import socket
 import time
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
 
 from rag import budget, config
+
+# Rate limiting and upstream faults; everything else is treated as permanent.
+_TRANSIENT_STATUS = {408, 409, 425, 429, 500, 502, 503, 504, 529}
 
 
 class LLMError(RuntimeError):
@@ -41,6 +45,37 @@ class TokenBudgetTooSmall(LLMError):
     the same budget fails identically every time. The caller must raise the
     budget rather than simply try again.
     """
+
+
+class TransientLLMError(LLMError):
+    """A failure that says nothing about the request and everything about the
+    moment it was sent: a read timeout, a dropped connection, a 429, or a 5xx.
+
+    Worth distinguishing because the opposite assumption was a real bug. A
+    grounded answer here measures ~60s against a 100s per-request timeout, so
+    ordinary queue variance on NVIDIA's shared free tier pushes a perfectly
+    answerable question over the limit. That timeout used to fall through to
+    the generic `break` below and abandon the question after ONE attempt —
+    with three attempts and ~130s of deadline still unspent — which is what
+    made identical questions answer fine one minute and degrade to raw quoted
+    passages the next.
+    """
+
+
+class RateLimited(TransientLLMError):
+    """Provider quota, not provider health.
+
+    Groq's free tier allows 8k tokens/minute and one grounded question costs
+    ~3.6k, so the third question inside a minute is refused. It answers with a
+    `Retry-After`, and honouring that is usually the fastest route to a real
+    answer: waiting ~28s and then getting a 1.5s reply beats failing over to a
+    provider that takes 60-200s. `retry_after` is None when the provider did
+    not say, in which case the caller moves straight on to the fallback.
+    """
+
+    def __init__(self, message: str, retry_after: float | None = None):
+        super().__init__(message)
+        self.retry_after = retry_after
 
 
 @dataclass
@@ -74,6 +109,33 @@ FALLBACK_MODELS = [
 ]
 
 
+@dataclass(frozen=True)
+class Provider:
+    name: str
+    base_url: str
+    model: str
+    key: str
+
+    def __str__(self) -> str:  # what shows up in error messages
+        return f"{self.model} via {self.name}"
+
+
+def providers(model: str | None = None) -> list[Provider]:
+    """Providers to try, in order, skipping any without a key.
+
+    Groq first for speed; NVIDIA second so that exhausting Groq's per-minute
+    free-tier cap degrades to a slow answer rather than no answer.
+    """
+    found: list[Provider] = []
+    groq_key = config.groq_api_key()
+    if groq_key:
+        found.append(Provider("groq", config.GROQ_BASE_URL, model or config.GROQ_MODEL, groq_key))
+    nvidia_key = config.llm_api_key()
+    if nvidia_key:
+        found.append(Provider("nvidia", config.LLM_BASE_URL, model or config.LLM_MODEL, nvidia_key))
+    return found
+
+
 def chat(
     messages: list[dict],
     *,
@@ -95,16 +157,12 @@ def chat(
     except budget.BudgetExceeded as exc:
         raise LLMError(str(exc)) from exc
 
-    key = config.llm_api_key()
-    if not key:
+    candidates = providers(model)
+    if not candidates:
         raise LLMError(
-            "No LLM API key. Set BIS_LLM_API_KEY, or HOSTED_LLM_API_KEY in the project .env"
+            "No LLM API key. Set GROQ_API_KEY (preferred) or HOSTED_LLM_API_KEY "
+            "in the project .env"
         )
-
-    candidates = [model or config.LLM_MODEL]
-    for fb in FALLBACK_MODELS:
-        if fb not in candidates:
-            candidates.append(fb)
 
     attempts_left = max(1, config.LLM_MAX_ATTEMPTS_PER_QUESTION)
     last: Exception | None = None
@@ -127,7 +185,25 @@ def chat(
             except budget.BudgetExceeded as exc:
                 raise LLMError(str(exc)) from exc
             try:
-                return _call(candidate, messages, key, tokens, temperature)
+                return _call(candidate, messages, tokens, temperature)
+            except RateLimited as exc:
+                last = exc
+                # Wait the cap out when the provider says how long and the
+                # deadline can absorb it: this provider answers in ~1.5s, so
+                # waiting is usually still faster than failing over. `+ 5`
+                # keeps a margin for the call that follows the wait.
+                spent = time.monotonic() - started
+                wait = exc.retry_after
+                if (
+                    attempts_left
+                    and wait is not None
+                    and spent + wait + 5 < config.LLM_TOTAL_DEADLINE
+                ):
+                    time.sleep(wait)
+                    continue
+                # No hint, or no room left — the fallback provider is the
+                # better use of what remains.
+                break
             except TokenBudgetTooSmall as exc:
                 last = exc
                 # Deterministic failure: the same budget would exhaust itself
@@ -137,6 +213,16 @@ def chat(
                     tokens = min(tokens * 2, config.LLM_MAX_TOKENS_CEILING)
                     continue
                 break
+            except TransientLLMError as exc:
+                last = exc
+                # Nothing about the request was wrong, so the same request can
+                # succeed on the next try. Retry while attempts and deadline
+                # remain; `out_of_time` at the top of the loop is what stops
+                # this becoming an unbounded wait.
+                if attempts_left:
+                    time.sleep(1.5)
+                    continue
+                break
             except LLMError as exc:
                 last = exc
                 text = str(exc)
@@ -144,9 +230,6 @@ def chat(
                 # attempts on it can only waste budget.
                 if "404" in text:
                     break
-                if attempts_left and "503" in text:
-                    time.sleep(1.5)
-                    continue
                 break
         if attempts_left <= 0:
             break
@@ -156,7 +239,8 @@ def chat(
     )
 
 
-def _call(model, messages, key, max_tokens, temperature) -> LLMResponse:
+def _call(provider, messages, max_tokens, temperature) -> LLMResponse:
+    model = provider.model
     payload = {
         "model": model,
         "messages": messages,
@@ -164,9 +248,17 @@ def _call(model, messages, key, max_tokens, temperature) -> LLMResponse:
         "temperature": temperature,
     }
     req = urllib.request.Request(
-        config.LLM_BASE_URL.rstrip("/") + "/chat/completions",
+        provider.base_url.rstrip("/") + "/chat/completions",
         data=json.dumps(payload).encode("utf-8"),
-        headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+        headers={
+            "Authorization": f"Bearer {provider.key}",
+            "Content-Type": "application/json",
+            # Groq sits behind Cloudflare, which rejects urllib's default
+            # agent outright with a 403 (error 1010) before the request ever
+            # reaches the API — an auth-looking failure that has nothing to do
+            # with the key.
+            "User-Agent": "manak-sahayak/1.0",
+        },
     )
     try:
         with urllib.request.urlopen(req, timeout=config.LLM_REQUEST_TIMEOUT) as resp:
@@ -179,9 +271,28 @@ def _call(model, messages, key, max_tokens, temperature) -> LLMResponse:
             body = exc.read().decode()[:300]
         except Exception:
             pass
-        raise LLMError(f"HTTP {exc.code} from {model}: {body}") from exc
+        msg = f"HTTP {exc.code} from {provider}: {body}"
+        if exc.code == 429:
+            raw = exc.headers.get("retry-after") if exc.headers else None
+            try:
+                wait = float(raw) if raw is not None else None
+            except (TypeError, ValueError):
+                wait = None
+            raise RateLimited(msg, retry_after=wait) from exc
+        # Server-side faults are about capacity at this instant, not about the
+        # request, so they are worth another attempt.
+        if exc.code in _TRANSIENT_STATUS:
+            raise TransientLLMError(msg) from exc
+        raise LLMError(msg) from exc
     except Exception as exc:
-        raise LLMError(f"{type(exc).__name__} calling {model}: {exc}") from exc
+        msg = f"{type(exc).__name__} calling {model}: {exc}"
+        # A read timeout or dropped connection. Measured latency here ranges
+        # from 9s to 80s for near-identical prompts, so the slow tail of that
+        # spread crosses LLM_REQUEST_TIMEOUT on questions that would otherwise
+        # have answered fine — retryable, not fatal.
+        if isinstance(exc, (TimeoutError, socket.timeout, urllib.error.URLError)):
+            raise TransientLLMError(msg) from exc
+        raise LLMError(msg) from exc
 
     usage = data.get("usage") or {}
     budget.record(
@@ -213,7 +324,10 @@ def _call(model, messages, key, max_tokens, temperature) -> LLMResponse:
         # failure so the caller retries or falls back, rather than shown.
         raise LLMError(f"{model} returned unfiltered chain-of-thought instead of an answer")
 
-    return LLMResponse(text=text, model=model)
+    # Name the provider, not just the model: both providers serve the same
+    # model id, so without this an answer gives no way to tell whether it came
+    # back in 2s from Groq or 60s from the NVIDIA fallback.
+    return LLMResponse(text=text, model=f"{model} ({provider.name})")
 
 
 # Phrases a narrated reasoning process opens with, that a direct answer never

@@ -18,7 +18,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
-from rag import budget, compliance, config, marks, store
+from rag import budget, config, marks, store
 from rag.answer import answer_question
 from rag.pathway import QUESTIONS, IncompleteAnswers, find_pathway
 from rag.search import Hit, Mode, search
@@ -169,58 +169,6 @@ def usage() -> dict:
     }
 
 
-# ── Product compliance timeline ──────────────────────────────────────────
-
-class TimelineRequest(BaseModel):
-    product: str = Field(min_length=2, max_length=120)
-
-
-@app.get("/products")
-def products() -> dict:
-    """Products whose Quality Control Orders form a chain worth tracing."""
-    return {"products": [{"name": n, "orders": c} for n, c in compliance.known_products()]}
-
-
-@app.post("/timeline")
-def timeline(req: TimelineRequest) -> dict:
-    t = compliance.timeline_for(req.product)
-    latest = t.latest
-    return {
-        "product": t.product,
-        "order_count": len(t.orders),
-        "amendment_count": t.amendments,
-        "undated_count": t.undated_count,
-        "standards": t.standards,
-        "latest": None if latest is None else {
-            "date": latest.notified_on.isoformat(),
-            "kind": latest.kind,
-            "document": latest.relpath,
-            "gazette": latest.gazette_numbers,
-        },
-        "orders": [
-            {
-                "date": o.notified_on.isoformat() if o.notified_on else None,
-                "date_label": o.date_label,
-                "date_source": o.date_source,
-                "kind": o.kind,
-                "gazette": o.gazette_numbers,
-                "standards": o.is_numbers,
-                "document": o.relpath,
-                "title": o.title,
-                "page": o.first_page,
-            }
-            for o in t.orders
-        ],
-        # Stated rather than implied: the chain is only as complete as the corpus.
-        "caveat": (
-            "Built from the Quality Control Orders indexed on this system. Dates are "
-            "read from each order's own gazette dateline; where an order does not "
-            "state one it is shown as unknown rather than guessed. There may be "
-            "further amendments that are not in this corpus."
-        ),
-    }
-
-
 # ── Certification pathway ────────────────────────────────────────────────
 
 class PathwayRequest(BaseModel):
@@ -238,6 +186,9 @@ def pathway_questions() -> dict:
                 "options": [
                     {"value": v, "label": {"en": le, "hi": lh}} for v, le, lh in q.options
                 ],
+                # Lets the interface hide a question that cannot apply yet —
+                # a consumer is never asked where their factory is.
+                "show_when": q.show_when,
             }
             for q in QUESTIONS
         ]
@@ -260,6 +211,7 @@ def pathway(req: PathwayRequest) -> dict:
         "summary": p.summary,
         "why": p.why,
         "caveat": p.caveat,
+        "sector": p.sector,
         "steps": [
             {"title": s.title, "detail": s.detail, "citations": s.citations} for s in p.steps
         ],

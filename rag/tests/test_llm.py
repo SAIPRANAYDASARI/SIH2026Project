@@ -90,9 +90,9 @@ def test_budget_exhaustion_escalates_tokens_instead_of_repeating(budgeted, monke
 
     seen: list[int] = []
 
-    def exhaust(model, messages, key, max_tokens, temperature):
+    def exhaust(provider, messages, max_tokens, temperature):
         seen.append(max_tokens)
-        raise llm.TokenBudgetTooSmall(f"{model} used all {max_tokens} tokens")
+        raise llm.TokenBudgetTooSmall(f"{provider.model} used all {max_tokens} tokens")
 
     monkeypatch.setattr(llm, "_call", exhaust)
     with pytest.raises(llm.LLMError):
@@ -108,7 +108,7 @@ def test_escalation_stops_at_the_ceiling(budgeted, monkeypatch):
     monkeypatch.setattr(config, "LLM_MAX_TOKENS_CEILING", 1500)
     seen: list[int] = []
 
-    def exhaust(model, messages, key, max_tokens, temperature):
+    def exhaust(provider, messages, max_tokens, temperature):
         seen.append(max_tokens)
         raise llm.TokenBudgetTooSmall("exhausted")
 
@@ -122,10 +122,10 @@ def test_escalation_stops_at_the_ceiling(budgeted, monkeypatch):
 def test_escalated_retry_can_succeed(budgeted, monkeypatch):
     from rag import llm
 
-    def exhaust_then_answer(model, messages, key, max_tokens, temperature):
+    def exhaust_then_answer(provider, messages, max_tokens, temperature):
         if max_tokens < 2000:
             raise llm.TokenBudgetTooSmall("too small")
-        return llm.LLMResponse(text="The fee is in Schedule IV. [S1]", model=model)
+        return llm.LLMResponse(text="The fee is in Schedule IV. [S1]", model=provider.model)
 
     monkeypatch.setattr(llm, "_call", exhaust_then_answer)
     assert "Schedule IV" in llm.chat([{"role": "user", "content": "q"}]).text
@@ -137,7 +137,7 @@ def test_non_deterministic_failures_do_not_escalate(budgeted, monkeypatch):
 
     seen: list[int] = []
 
-    def overloaded(model, messages, key, max_tokens, temperature):
+    def overloaded(provider, messages, max_tokens, temperature):
         seen.append(max_tokens)
         raise llm.LLMError("HTTP 503 overloaded")
 

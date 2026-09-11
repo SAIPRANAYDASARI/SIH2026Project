@@ -43,7 +43,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
-from rag import budget, config, llm, scope
+from rag import budget, config, hsn, llm, scope, store
 from rag.quality import DEVANAGARI
 from rag.search import Hit, Mode, search
 
@@ -321,6 +321,66 @@ def _validate(text: str, n_sources: int) -> tuple[str, list[int], list[int]]:
     return re.sub(r"[ \t]{2,}", " ", text).strip(), sorted(cited), sorted(invalid)
 
 
+def _hsn_row_to_hit(row: "hsn.HsnRow", chunk_id: int) -> Hit:
+    """A synthetic Hit so the HSN matrix's answer flows through the same
+    citation/source-card rendering as a normal PDF passage, instead of the
+    frontend needing a second code path. The HSN code stands in for a page
+    number: it is the actual locator you would use to find this row in the
+    source workbook, which is what a page number is for in a PDF citation.
+    """
+    detail_lines = [f"{k}: {v}" for k, v in row.fields.items() if v]
+    return Hit(
+        chunk_id=chunk_id,
+        text="\n".join(detail_lines),
+        relpath="HSN_Import_Export_Compliance_Matrix.xlsx",
+        page_number=int(re.sub(r"\D", "", row.hsn_cd) or 0),
+        title=f"HSN {row.hsn_cd} — {row.product}"[:120],
+        category="HSN_COMPLIANCE",
+        source_url=None,
+        score=1.0,
+        sources={"hsn"},
+    )
+
+
+def _hsn_answer(question: str, reply_language: str) -> Answer | None:
+    """Answer directly from the HSN compliance matrix when the question is
+    clearly about one, bypassing retrieval and the LLM entirely.
+
+    Returns None when the question does not mention HSN at all, so the
+    caller falls through to the normal BIS-document pipeline unchanged.
+    A question that DOES mention HSN but matches no row still returns an
+    Answer (a clear "not found"), rather than None, so the caller does not
+    then run it through the generic BIS scope gate and refuse it for an
+    unrelated reason.
+    """
+    if not hsn.mentions_hsn(question):
+        return None
+
+    conn = store.connect()
+    code = hsn.extract_code(question)
+    rows = []
+    if code:
+        row = hsn.lookup_by_code(conn, code)
+        if row:
+            rows = [row]
+    if not rows:
+        rows = hsn.search_by_product(conn, hsn.strip_trigger_words(question), top_k=3)
+
+    intent = hsn.detect_intent(question)
+    text = hsn.format_answer(rows, language=reply_language, intent=intent)
+    hits = [_hsn_row_to_hit(r, i + 1) for i, r in enumerate(rows)]
+    return Answer(
+        text=text,
+        hits=hits,
+        cited=list(range(1, len(hits) + 1)),
+        grounded=bool(rows),
+        refused=False,
+        reason="hsn lookup" if rows else "hsn: no matching row",
+        model="hsn matrix lookup (no model call)",
+        mode=Mode.HYBRID.value,
+    )
+
+
 def _offline_answer(
     question: str, hits: list[Hit], mode: Mode, language: str | None = None
 ) -> Answer:
@@ -572,6 +632,15 @@ def answer_question(
             model="direct reply (no model call)",
             mode=mode.value,
         )
+
+    # HSN import/export questions are answered from a dedicated lookup table,
+    # not the BIS PDF corpus — see rag/hsn.py for why a compliance-matrix row
+    # is looked up exactly rather than retrieved by similarity. Checked before
+    # the scope gate because the gate's vocabulary is BIS-specific and does
+    # not recognise "HSN 1011010" as in-domain on its own.
+    hsn_answer = _hsn_answer(retrieval_query, reply_language)
+    if hsn_answer is not None:
+        return hsn_answer
 
     # Refuse off-domain questions before retrieving anything or calling the
     # model. Without this the general-knowledge path answered "who is Virat

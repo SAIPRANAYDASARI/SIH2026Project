@@ -54,6 +54,17 @@ def cmd_embed(args) -> int:
     return 0
 
 
+def cmd_hsn_import(args) -> int:
+    from pathlib import Path
+
+    from rag import hsn
+
+    conn = store.connect(create=True)
+    n = hsn.ingest_matrix(conn, Path(args.path))
+    print(f"Loaded {n} HSN rows into {config.DB_PATH}")
+    return 0
+
+
 def cmd_stats(args) -> int:
     conn = store.connect()
     meta = store.get_meta(conn, "stats", {}) or {}
@@ -210,6 +221,10 @@ def main(argv=None) -> int:
     p = sub.add_parser("embed", help="build dense vectors (resumable)")
     p.add_argument("--batch", type=int, default=256)
     p.set_defaults(func=cmd_embed)
+
+    p = sub.add_parser("hsn-import", help="load the HSN import/export compliance matrix")
+    p.add_argument("path", help="path to the .xlsx workbook")
+    p.set_defaults(func=cmd_hsn_import)
 
     p = sub.add_parser("stats", help="corpus and index coverage")
     p.set_defaults(func=cmd_stats)

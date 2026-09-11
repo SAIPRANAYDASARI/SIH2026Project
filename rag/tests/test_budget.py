@@ -107,13 +107,181 @@ def test_one_question_cannot_exceed_the_attempt_budget(monkeypatch):
     calls = []
     def always_503(model, *a, **k):
         calls.append(model)
-        raise llm.LLMError(f"HTTP 503 from {model}: overloaded")
+        # What `_call` raises for a 5xx: retryable, but still capped.
+        raise llm.TransientLLMError(f"HTTP 503 from {model}: overloaded")
     monkeypatch.setattr(llm, "_call", always_503)
     monkeypatch.setattr(llm.time, "sleep", lambda *_: None)
 
     with pytest.raises(llm.LLMError, match="Gave up after 3"):
         llm.chat([{"role": "user", "content": "hi"}])
     assert len(calls) == 3
+
+
+def test_read_timeout_is_retried_not_abandoned(monkeypatch):
+    """A slow response must not cost the user their answer.
+
+    Measured latency against this provider swings from ~9s to ~80s for
+    near-identical prompts, so the slow tail crosses LLM_REQUEST_TIMEOUT on
+    questions that would otherwise answer fine. This used to abandon the
+    question after ONE attempt and degrade it to raw quoted passages, with
+    attempts and deadline still unspent.
+    """
+    monkeypatch.setattr(config, "LLM_MAX_ATTEMPTS_PER_QUESTION", 3)
+    monkeypatch.setattr(config, "LLM_DAILY_CALL_LIMIT", 999)
+    monkeypatch.setattr(config, "llm_api_key", lambda: "test-key")
+    monkeypatch.setattr(llm.time, "sleep", lambda *_: None)
+
+    calls = []
+    def timeout_then_answer(model, *a, **k):
+        calls.append(model)
+        if len(calls) == 1:
+            raise llm.TransientLLMError("TimeoutError calling x: timed out")
+        return llm.LLMResponse(text="The fee is Rs 45 per article [S1]", model=model)
+    monkeypatch.setattr(llm, "_call", timeout_then_answer)
+
+    result = llm.chat([{"role": "user", "content": "hallmarking fee"}])
+    assert len(calls) == 2, "the timeout should have been retried"
+    assert "[S1]" in result.text
+
+
+def test_permanent_failure_is_not_retried_on_the_same_provider(monkeypatch):
+    """A 404 means the model is not enabled for that account; retrying the
+    same provider can only burn budget with no chance of succeeding.
+
+    Pinned to one provider so this measures retry behaviour, not the
+    separate (and wanted) fall-through to the next provider.
+    """
+    monkeypatch.setattr(config, "LLM_MAX_ATTEMPTS_PER_QUESTION", 3)
+    monkeypatch.setattr(config, "LLM_DAILY_CALL_LIMIT", 999)
+    monkeypatch.setattr(
+        llm, "providers",
+        lambda model=None: [llm.Provider("solo", "https://example.invalid/v1", "m", "k")],
+    )
+
+    calls = []
+    def always_404(provider, *a, **k):
+        calls.append(provider)
+        raise llm.LLMError(f"HTTP 404 from {provider}: not found for account")
+    monkeypatch.setattr(llm, "_call", always_404)
+
+    with pytest.raises(llm.LLMError):
+        llm.chat([{"role": "user", "content": "hi"}])
+    assert len(calls) == 1
+
+
+def test_rate_limit_waits_out_a_short_retry_after(monkeypatch):
+    """Groq answers in ~1.5s, so waiting out a 28s cap beats failing over to a
+    provider that takes 60-200s. The wait must be the one the provider asked
+    for, not a guess."""
+    monkeypatch.setattr(config, "LLM_MAX_ATTEMPTS_PER_QUESTION", 4)
+    monkeypatch.setattr(config, "LLM_DAILY_CALL_LIMIT", 999)
+    monkeypatch.setattr(config, "LLM_TOTAL_DEADLINE", 190)
+    slept: list[float] = []
+    monkeypatch.setattr(llm.time, "sleep", lambda s: slept.append(s))
+    monkeypatch.setattr(
+        llm, "providers",
+        lambda model=None: [
+            llm.Provider("groq", "https://api.groq.com/openai/v1", "m", "k"),
+            llm.Provider("nvidia", "https://integrate.api.nvidia.com/v1", "m", "k"),
+        ],
+    )
+
+    seen = []
+    def capped_once(provider, *a, **k):
+        seen.append(provider.name)
+        if len(seen) == 1:
+            raise llm.RateLimited("HTTP 429", retry_after=28)
+        return llm.LLMResponse(text="Fee is Rs 45 [S1]", model=provider.model)
+    monkeypatch.setattr(llm, "_call", capped_once)
+
+    result = llm.chat([{"role": "user", "content": "hi"}])
+    assert slept == [28], f"should wait exactly what the provider asked: {slept}"
+    assert seen == ["groq", "groq"], f"should retry the fast provider: {seen}"
+    assert "[S1]" in result.text
+
+
+def test_rate_limit_without_a_hint_uses_the_fallback(monkeypatch):
+    """No Retry-After means no idea how long to wait, so the question goes to
+    the fallback provider rather than stalling on a guess."""
+    monkeypatch.setattr(config, "LLM_MAX_ATTEMPTS_PER_QUESTION", 4)
+    monkeypatch.setattr(config, "LLM_DAILY_CALL_LIMIT", 999)
+    monkeypatch.setattr(llm.time, "sleep", lambda *_: None)
+    monkeypatch.setattr(
+        llm, "providers",
+        lambda model=None: [
+            llm.Provider("groq", "https://api.groq.com/openai/v1", "m", "k"),
+            llm.Provider("nvidia", "https://integrate.api.nvidia.com/v1", "m", "k"),
+        ],
+    )
+
+    seen = []
+    def groq_capped(provider, *a, **k):
+        seen.append(provider.name)
+        if provider.name == "groq":
+            raise llm.RateLimited("HTTP 429", retry_after=None)
+        return llm.LLMResponse(text="answer [S1]", model=provider.model)
+    monkeypatch.setattr(llm, "_call", groq_capped)
+
+    llm.chat([{"role": "user", "content": "hi"}])
+    assert seen == ["groq", "nvidia"], seen
+
+
+def test_rate_limit_skips_a_wait_that_would_blow_the_deadline(monkeypatch):
+    """A cap longer than the time left must not be waited out — the user would
+    be left staring at a spinner past the deadline that exists to prevent it."""
+    monkeypatch.setattr(config, "LLM_MAX_ATTEMPTS_PER_QUESTION", 4)
+    monkeypatch.setattr(config, "LLM_DAILY_CALL_LIMIT", 999)
+    monkeypatch.setattr(config, "LLM_TOTAL_DEADLINE", 30)
+    slept: list[float] = []
+    monkeypatch.setattr(llm.time, "sleep", lambda s: slept.append(s))
+    monkeypatch.setattr(
+        llm, "providers",
+        lambda model=None: [
+            llm.Provider("groq", "https://api.groq.com/openai/v1", "m", "k"),
+            llm.Provider("nvidia", "https://integrate.api.nvidia.com/v1", "m", "k"),
+        ],
+    )
+
+    seen = []
+    def groq_capped(provider, *a, **k):
+        seen.append(provider.name)
+        if provider.name == "groq":
+            raise llm.RateLimited("HTTP 429", retry_after=600)
+        return llm.LLMResponse(text="answer [S1]", model=provider.model)
+    monkeypatch.setattr(llm, "_call", groq_capped)
+
+    llm.chat([{"role": "user", "content": "hi"}])
+    assert slept == [], "a 600s wait must never be taken"
+    assert seen == ["groq", "nvidia"], seen
+
+
+def test_groq_rate_limit_falls_through_to_the_fallback_provider(monkeypatch):
+    """Groq's free tier caps tokens per minute. That cap cannot clear in the
+    seconds a retry would wait, so the question must reach the fallback
+    provider instead of spending every attempt being rate-limited.
+    """
+    monkeypatch.setattr(config, "LLM_MAX_ATTEMPTS_PER_QUESTION", 4)
+    monkeypatch.setattr(config, "LLM_DAILY_CALL_LIMIT", 999)
+    monkeypatch.setattr(llm.time, "sleep", lambda *_: None)
+    monkeypatch.setattr(
+        llm, "providers",
+        lambda model=None: [
+            llm.Provider("groq", "https://api.groq.com/openai/v1", "m", "k"),
+            llm.Provider("nvidia", "https://integrate.api.nvidia.com/v1", "m", "k"),
+        ],
+    )
+
+    seen = []
+    def groq_capped(provider, *a, **k):
+        seen.append(provider.name)
+        if provider.name == "groq":
+            raise llm.RateLimited("HTTP 429 from groq: rate_limit_exceeded")
+        return llm.LLMResponse(text="Fee is Rs 45 [S1]", model=provider.model)
+    monkeypatch.setattr(llm, "_call", groq_capped)
+
+    result = llm.chat([{"role": "user", "content": "hi"}])
+    assert seen == ["groq", "nvidia"], seen
+    assert "[S1]" in result.text
 
 
 def test_offline_answer_makes_no_network_call(monkeypatch, no_network):
@@ -179,7 +347,10 @@ def test_only_one_endpoint_is_ever_called():
         for match in re.findall(r"https?://[^\s\"')]+", source):
             if "localhost" not in match and "127.0.0.1" not in match:
                 callers.add(match.rstrip("/"))
-    assert callers == {"https://integrate.api.nvidia.com/v1"}, callers
+    assert callers == {
+        "https://api.groq.com/openai/v1",  # primary — fast
+        "https://integrate.api.nvidia.com/v1",  # fallback when Groq is capped
+    }, callers
 
 
 def test_reference_links_are_not_fetched_by_code():

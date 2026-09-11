@@ -25,6 +25,11 @@ data/blobs/
 data/raw/
 *.sqlite3
 
+## Source PDF corpus — copyrighted BIS documents, never redistributed.
+## Lives at C:\bisnew per rag/config.py; a copy must never land in the repo.
+bisnew/
+.venv.zip
+
 ## Generated RAG index (rebuild with: python -m rag.cli build && python -m rag.cli embed)
 rag_index/
 *.npy
