@@ -6,8 +6,12 @@ retrieves the English legal provision that actually answers it. That property
 is what makes "multilingual" real here, given that the Hindi text inside many
 of these gazettes is too corrupted to index (see rag/quality.py).
 
-The model runs locally on CPU. Loading is deferred until first use so that
-keyword-only search never pays the several-second model load.
+The model runs locally, on GPU when one is available and CPU otherwise —
+this only speeds up building/re-embedding the index (encoding ~30k chunks
+once); it has no effect on the hosted LLM or on answering a single question,
+both of which are fast enough on CPU already. Loading is deferred until
+first use so that keyword-only search never pays the several-second model
+load.
 """
 
 from __future__ import annotations
@@ -19,12 +23,26 @@ from rag import config
 _model = None
 
 
+def _pick_device() -> str:
+    forced = config.EMBEDDING_DEVICE
+    if forced:
+        return forced
+    try:
+        import torch
+
+        if torch.cuda.is_available():
+            return "cuda"
+    except Exception:
+        pass
+    return "cpu"
+
+
 def get_model():
     global _model
     if _model is None:
         from sentence_transformers import SentenceTransformer
 
-        _model = SentenceTransformer(config.EMBEDDING_MODEL, device="cpu")
+        _model = SentenceTransformer(config.EMBEDDING_MODEL, device=_pick_device())
     return _model
 
 
