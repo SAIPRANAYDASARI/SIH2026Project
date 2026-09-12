@@ -1,17 +1,28 @@
 """HSN import/export compliance lookup.
 
-The matrix is a lookup table, not prose: these tests exist to prove that a
-code lookup returns the exact row (no similarity ranking, no LLM guessing),
-that leading zeros and mojibake don't silently break it, and that a
-compliance question routes to the matrix rather than into the BIS PDF
-pipeline or a refusal.
+This is a dedicated, deterministic lookup tool — like rag/marks.py's
+licence/HUID decoder — surfaced through its own UI tab and API endpoint,
+NOT wired into chat/answer_question. An earlier version routed HSN-looking
+chat questions through fuzzy product-name search automatically, which
+produced wrong answers (a "electric kettle" compliance question returning a
+ceramic-tile row, because common English words in the question happened to
+overlap with that row's wording) and no clear way for a user to tell a
+confident exact match from a fuzzy guess. Exact code lookup is precise by
+construction; free-text intent detection is not, so it was pulled out of
+chat entirely in favour of a form the user fills in themselves.
+
+These tests exist to prove the code lookup returns the exact row (no
+similarity ranking involved at all), that leading zeros and mojibake don't
+silently break it, and that the product-name search — used only when the
+user explicitly asks to search by name, never automatically from a chat
+question — filters out compliance-question wrapper words that would
+otherwise drown out the real product terms.
 """
 
 import sqlite3
 
 import pytest
 
-from rag import answer as answer_mod
 from rag import hsn
 
 
@@ -38,6 +49,24 @@ def conn():
          None, None, None, None,
          "Shipping Bill", "Free", None,
          "BIS", "BIS hallmarking scheme"),
+        # Real row from the workbook, kept verbatim: its wording happens to
+        # share several common English words ("whether", "the", "is") with
+        # an ordinary compliance question, which is exactly what caused the
+        # reported bug (a kettle question returning this ceramic-tile row).
+        ("690710", "Tariff Item", "69", "Ceramic products", "6907",
+         "TILES, CUBES AND SIMILAR ARTICLES, WHETHER OR NOT RECTANGULAR, "
+         "THE LARGEST SURFACE AREA OF WHICH IS CAPABLE OF BEING ENCLOSED "
+         "IN A SQUARE THE SIDE OF WHICH IS LESS THAN 7 CM",
+         "Bill of Entry; IEC", "Not notified", "Free",
+         None, None, None, None,
+         "Shipping Bill", "Free", None,
+         "BIS", "BIS QCO list"),
+        ("95038010", "Tariff Item", "95", "Toys, games and sports requisites", "9503",
+         "OTHER TOYS; REDUCED-SIZE MODELS AND SIMILAR RECREATIONAL MODELS",
+         "Bill of Entry; IEC", "IS 9873 toy safety", "Free",
+         None, None, None, None,
+         "Shipping Bill", "Free", None,
+         "BIS", "BIS toy QCO"),
     ]
     c.executemany(
         """INSERT INTO hsn_codes (
@@ -113,19 +142,48 @@ def test_strip_trigger_words_removes_hsn_but_keeps_product():
     assert "gold" in cleaned.lower()
 
 
-# ── detect_intent ─────────────────────────────────────────────────────────
+# ── strip_filler_words / search_by_product regression ────────────────────
+#
+# Reported bug: "I sell electric kettles in India. What is the HSN code, GST
+# rate, and whether BIS certification is required?" returned a ceramic tile
+# row and other unrelated products. Root cause was search_by_product sending
+# every word in the question (including "is", "the", "and", "whether") into
+# an unfiltered OR query — words that happened to also appear inside the
+# tariff's own verbose legal wording ("...WHETHER OR NOT RECTANGULAR, THE
+# LARGEST...IS CAPABLE...").
 
-@pytest.mark.parametrize("question,expected", [
-    ("what import documents do I need for HSN 1011010?", "import"),
-    ("documents required to import this HSN code", "import"),
-    ("what export documents for HSN 71141910?", "export"),
-    ("documents needed to export this HSN code", "export"),
-    ("what is HSN 1011010?", "both"),
-    ("what documents for HSN 1011010, both import and export?", "both"),
-    ("importers and exporters of HSN 1011010 need what?", "both"),
+def test_compliance_question_does_not_match_an_unrelated_ceramic_row(conn):
+    """The exact bug report: a compliance question about one product must
+    not surface a completely unrelated row just because they share common
+    English words."""
+    question = (
+        "I sell electric kettles in India. What is the HSN code, GST rate, "
+        "and whether BIS certification is required?"
+    )
+    rows = hsn.search_by_product(conn, hsn.strip_filler_words(question), top_k=5)
+    assert all(r.hsn_cd != "690710" for r in rows), (
+        "the ceramic tile row must not appear for a question that never "
+        "mentions ceramics, tiles, or anything related to them"
+    )
+
+
+def test_compliance_question_finds_the_real_product_despite_wrapper_words(conn):
+    """"I manufacture toys, what HSN code and documents are required?" must
+    find the toy row — "manufacture"/"required"/"documents" are compliance
+    wrapper words, not product words, and must not drown out "toys"."""
+    question = "I manufacture toys, what HSN code and documents are required?"
+    rows = hsn.search_by_product(conn, hsn.strip_filler_words(question), top_k=3)
+    assert rows and rows[0].hsn_cd == "95038010"
+
+
+@pytest.mark.parametrize("word", [
+    "sell", "buy", "gst", "rate", "certification", "required", "documents",
+    "compliance", "licence", "import", "export", "bis", "india", "code",
+    "whether", "manufacture", "manufacturing", "product",
 ])
-def test_detect_intent(question, expected):
-    assert hsn.detect_intent(question) == expected
+def test_filler_word_is_actually_removed(word):
+    cleaned = hsn.strip_filler_words(f"what {word} do I need for this item")
+    assert word not in cleaned.lower().split()
 
 
 # ── format_answer ────────────────────────────────────────────────────────
@@ -144,38 +202,10 @@ def test_format_answer_never_invents_a_field_the_row_lacks(conn):
     assert "IS 1417 hallmarking" in text  # field that WAS present is shown
 
 
-def test_import_intent_omits_the_export_section(conn):
-    """Asking specifically about import documents must not also dump the
-    export section — that dumping-everything behaviour is the exact
-    complaint this filtering exists to fix."""
+def test_format_answer_includes_both_import_and_export(conn):
     row = hsn.lookup_by_code(conn, "1011010")
-    text = hsn.format_answer([row], language="English", intent="import")
-    assert "To import:" in text
-    assert "Bill of Entry" in text          # an import field
-    assert "To export:" not in text
-    assert "Shipping Bill" not in text      # an export-only field
-
-
-def test_export_intent_omits_the_import_section(conn):
-    row = hsn.lookup_by_code(conn, "1011010")
-    text = hsn.format_answer([row], language="English", intent="export")
-    assert "To export:" in text
-    assert "Shipping Bill" in text          # an export field
-    assert "To import:" not in text
-    assert "Bill of Entry" not in text      # an import-only field
-
-
-def test_both_intent_is_the_full_row(conn):
-    row = hsn.lookup_by_code(conn, "1011010")
-    text = hsn.format_answer([row], language="English", intent="both")
+    text = hsn.format_answer([row], language="English")
     assert "To import:" in text and "To export:" in text
-
-
-def test_hindi_import_intent_also_omits_export_section(conn):
-    row = hsn.lookup_by_code(conn, "1011010")
-    text = hsn.format_answer([row], language="Hindi", intent="import")
-    assert "आयात के लिए" in text
-    assert "निर्यात के लिए" not in text
 
 
 def test_mojibake_is_repaired_on_ingest(tmp_path):
@@ -188,71 +218,3 @@ def test_mojibake_is_repaired_on_ingest(tmp_path):
     assert hsn._fix_mojibake(None) is None
 
 
-# ── wiring into answer_question ──────────────────────────────────────────
-
-def test_hsn_question_short_circuits_before_the_scope_gate(monkeypatch, conn):
-    """An HSN question must never hit the generic BIS scope gate — its
-    vocabulary ("HSN", "tariff") is not in scope.py's domain list, so
-    routing it there would produce a wrong refusal instead of an answer."""
-    monkeypatch.setattr(answer_mod.store, "connect", lambda *a, **k: conn)
-    monkeypatch.setattr(answer_mod.scope, "check_scope",
-                        lambda *a, **k: (_ for _ in ()).throw(
-                            AssertionError("scope gate must not run for HSN questions")))
-
-    result = answer_mod.answer_question("what documents for HSN 1011010?", language="en")
-    assert result.grounded is True
-    assert "LIVE HORSES" in result.text
-
-
-def test_import_only_question_gets_import_only_answer_end_to_end(monkeypatch, conn):
-    """The behaviour actually reported as the problem: asking about import
-    documents for an HSN code must not also return the export section."""
-    monkeypatch.setattr(answer_mod.store, "connect", lambda *a, **k: conn)
-
-    result = answer_mod.answer_question(
-        "what import documents do I need for HSN 1011010?", language="en"
-    )
-    assert "To import:" in result.text
-    assert "To export:" not in result.text
-    assert "Shipping Bill" not in result.text
-    assert result.model == "hsn matrix lookup (no model call)"
-
-
-def test_hsn_question_with_no_match_still_short_circuits(monkeypatch, conn):
-    """A "not found" HSN answer must not fall through to the BIS pipeline —
-    that would risk the general-knowledge path inventing compliance
-    requirements for a code that is not actually in the matrix."""
-    monkeypatch.setattr(answer_mod.store, "connect", lambda *a, **k: conn)
-
-    def boom(*a, **k):
-        raise AssertionError("must not reach the generic search pipeline")
-    monkeypatch.setattr(answer_mod, "search", boom)
-
-    result = answer_mod.answer_question("what is HSN 99999999?", language="en")
-    assert result.grounded is False
-    assert result.refused is False
-    assert "No row" in result.text
-
-
-def test_non_hsn_question_is_unaffected(monkeypatch):
-    """A normal BIS question must not be intercepted just because the HSN
-    hook exists in the pipeline."""
-    called = {}
-    def fake_search(*a, **k):
-        called["yes"] = True
-        return []
-    monkeypatch.setattr(answer_mod, "search", fake_search)
-
-    answer_mod.answer_question("what is IS 9873?", language="en")
-    assert called.get("yes"), "generic search must still run for non-HSN questions"
-
-
-def test_hsn_takes_no_llm_budget(monkeypatch, conn):
-    """The whole point of a deterministic lookup is that it costs nothing —
-    an HSN question must never touch the LLM client."""
-    monkeypatch.setattr(answer_mod.store, "connect", lambda *a, **k: conn)
-    def boom(*a, **k):
-        raise AssertionError("HSN lookup must not call the LLM")
-    monkeypatch.setattr(answer_mod.llm, "chat", boom)
-
-    answer_mod.answer_question("HSN 1011010 import documents", language="en")

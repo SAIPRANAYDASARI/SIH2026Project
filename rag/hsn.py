@@ -186,17 +186,31 @@ def search_by_product(conn: sqlite3.Connection, query: str, top_k: int = 5) -> l
     Prefers the most specific matching level (a Tariff Item over the Chapter
     it belongs to) so "documents for live horses" returns the actual line
     item rather than the whole "Live animals" chapter it is filed under.
+
+    Query building is delegated to rag.search.build_fts_query — the same
+    stopword-filtered query the main BIS search already uses. An earlier
+    version of this function built its own OR-of-every-word query with no
+    stopword filtering, which sent words like "is", "the", "and", "whether"
+    into the match alongside the real product terms. Those common words
+    happened to also appear inside the (verbosely worded, legal-style) tariff
+    descriptions — e.g. "...WHETHER OR NOT RECTANGULAR, THE LARGEST... IS
+    CAPABLE..." for ceramic tiles — so a question like "I sell electric
+    kettles, what HSN code, GST rate..." could out-rank actual kettle rows
+    with an unrelated ceramics row that coincidentally shared more of the
+    common words. Filtering stopwords first fixes that at the source rather
+    than trying to out-tune ranking weights around noise.
     """
-    terms = re.findall(r"[A-Za-z0-9]+", query or "")
-    if not terms:
+    from rag.search import build_fts_query
+
+    fts_query = build_fts_query(query or "")
+    if fts_query == '""':
         return []
-    fts_query = " OR ".join(terms)
     rows = conn.execute(
         """
         SELECT hc.* FROM hsn_fts f
         JOIN hsn_codes hc ON hc.id = f.rowid
         WHERE hsn_fts MATCH ?
-        ORDER BY bm25(hsn_fts),
+        ORDER BY bm25(hsn_fts, 3.0, 0.5, 1.5),
                  CASE hc.level
                    WHEN 'Tariff Item' THEN 0
                    WHEN '7-digit' THEN 0
@@ -240,37 +254,44 @@ def strip_trigger_words(question: str) -> str:
     return _HSN_WORD.sub(" ", question or "")
 
 
-_IMPORT_WORD = re.compile(r"\bimport(?:ed|ing|er|ers)?\b", re.IGNORECASE)
-_EXPORT_WORD = re.compile(r"\bexport(?:ed|ing|er|ers)?\b", re.IGNORECASE)
+# rag.search.build_fts_query already strips generic English/Hindi stopwords
+# ("is", "the", "and"...), but a real HSN question is a compliance question
+# wrapped around a product name ("I SELL electric kettles, what HSN code,
+# GST rate, and whether BIS CERTIFICATION is REQUIRED"), not a bare product
+# name. Those wrapper words are legitimate BIS vocabulary in general (the
+# main document search must keep "certification"), but for THIS lookup they
+# are never going to appear in a customs tariff description and only add
+# noise. Confirmed against the real workbook: without stripping these, "I
+# sell electric kettles in India, HSN code, GST rate, certification
+# required?" matched ceramic tiles ("...WHETHER OR NOT RECTANGULAR, THE
+# LARGEST... IS CAPABLE...") and "INDIA PAPER" (a real product name that
+# happens to contain the literal word "India") ahead of anything about
+# kettles, purely because "whether", "india" etc. are common in the
+# question but rare across the tariff as a whole, which is exactly what
+# BM25 rewards.
+_HSN_FILLER_WORDS = re.compile(
+    r"\b(?:sell|selling|seller|buy|buying|buyer|gst|rate|rates|certification|"
+    r"certificate|required|require|requires|requirement|requirements|"
+    r"document|documents|documentation|compliance|comply|complies|licence|"
+    r"license|licences|licenses|import|imports|importing|importer|export|"
+    r"exports|exporting|exporter|bis|india|indian|need|needed|needs|"
+    r"applicable|apply|applies|please|tell|know|want|code|whether|number|"
+    r"details|information|info|manufacture|manufactures|manufacturing|"
+    r"manufacturer|make|makes|making|made|produce|produces|producing|"
+    r"product|products)\b",
+    re.IGNORECASE,
+)
 
 
-def detect_intent(question: str) -> str:
-    """"import", "export", or "both" — which half of the row the question
-    is actually asking about.
-
-    A question that names only one direction ("what documents do I need to
-    IMPORT this?") gets only that direction's fields. Naming both, or
-    naming neither ("what is HSN 1011010?"), returns everything: the second
-    case is a plain lookup with no stated intent, and guessing which half to
-    hide would drop information the user never said they didn't want.
-    """
-    has_import = bool(_IMPORT_WORD.search(question or ""))
-    has_export = bool(_EXPORT_WORD.search(question or ""))
-    if has_import and not has_export:
-        return "import"
-    if has_export and not has_import:
-        return "export"
-    return "both"
+def strip_filler_words(question: str) -> str:
+    """Trigger words plus the compliance-question wrapper words above —
+    what's left is (as close as a regex gets to) just the product name."""
+    return _HSN_FILLER_WORDS.sub(" ", strip_trigger_words(question))
 
 
-def format_answer(rows: list[HsnRow], *, language: str = "English", intent: str = "both") -> str:
+def format_answer(rows: list[HsnRow], *, language: str = "English") -> str:
     """Plain-language answer built directly from the matrix — no model call,
     so nothing here can be paraphrased into something the row does not say.
-
-    `intent` ("import", "export", or "both") drops the section the question
-    did not ask about, rather than always printing the full row. Asking
-    specifically about import documents and getting the export section back
-    too is exactly the "dumps everything" behaviour this exists to avoid.
     """
     hindi = language.startswith("Hindi")
     if not rows:
@@ -292,21 +313,19 @@ def format_answer(rows: list[HsnRow], *, language: str = "English", intent: str 
                 f"अध्याय: {row.chapter_title}" if hindi else f"Chapter: {row.chapter_title}"
             )
 
-        if intent in ("import", "both"):
-            parts.append("")
-            parts.append("आयात के लिए (Import):" if hindi else "To import:")
-            for key, label_en, label_hi in _IMPORT_FIELDS:
-                val = row.fields.get(key)
-                if val:
-                    parts.append(f"  - {label_hi if hindi else label_en}: {val}")
+        parts.append("")
+        parts.append("आयात के लिए (Import):" if hindi else "To import:")
+        for key, label_en, label_hi in _IMPORT_FIELDS:
+            val = row.fields.get(key)
+            if val:
+                parts.append(f"  - {label_hi if hindi else label_en}: {val}")
 
-        if intent in ("export", "both"):
-            parts.append("")
-            parts.append("निर्यात के लिए (Export):" if hindi else "To export:")
-            for key, label_en, label_hi in _EXPORT_FIELDS:
-                val = row.fields.get(key)
-                if val:
-                    parts.append(f"  - {label_hi if hindi else label_en}: {val}")
+        parts.append("")
+        parts.append("निर्यात के लिए (Export):" if hindi else "To export:")
+        for key, label_en, label_hi in _EXPORT_FIELDS:
+            val = row.fields.get(key)
+            if val:
+                parts.append(f"  - {label_hi if hindi else label_en}: {val}")
 
         regulator = row.fields.get("primary_regulator")
         if regulator:

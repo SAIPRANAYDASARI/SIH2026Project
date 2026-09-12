@@ -18,7 +18,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
-from rag import budget, config, marks, store
+from rag import budget, config, hsn, marks, store
 from rag.answer import answer_question
 from rag.pathway import QUESTIONS, IncompleteAnswers, find_pathway
 from rag.search import Hit, Mode, search
@@ -238,6 +238,52 @@ def decode_mark(req: MarkRequest) -> dict:
         "verify_at": None if not r.verify_at else {"name": r.verify_at[0], "url": r.verify_at[1]},
         "search_hint": r.search_hint,
         "warnings": r.warnings,
+    }
+
+
+# ── HSN import/export compliance lookup ──────────────────────────────────
+#
+# A dedicated tool, not a chat capability: given an HSN code (exact match)
+# or a product name (keyword search), it returns the matching row(s) from
+# the HSN Import-Export Compliance Matrix directly — no LLM call, so nothing
+# here can be paraphrased into something the row does not say. See
+# rag/hsn.py's module docstring for why this stays out of answer_question.
+
+class HsnRequest(BaseModel):
+    value: str = Field(min_length=1, max_length=200)
+    language: str | None = None
+
+
+@app.post("/hsn")
+def hsn_lookup(req: HsnRequest) -> dict:
+    conn = store.connect()
+
+    rows: list[hsn.HsnRow] = []
+    matched_by = "code"
+    if any(ch.isdigit() for ch in req.value):
+        row = hsn.lookup_by_code(conn, req.value)
+        if row:
+            rows = [row]
+    if not rows:
+        matched_by = "product"
+        rows = hsn.search_by_product(conn, hsn.strip_filler_words(req.value), top_k=5)
+
+    language = "Hindi (हिन्दी)" if (req.language or "en").lower().startswith("hi") else "English"
+    return {
+        "query": req.value,
+        "matched_by": matched_by,
+        "found": bool(rows),
+        "text": hsn.format_answer(rows, language=language),
+        "rows": [
+            {
+                "hsn_cd": r.hsn_cd,
+                "level": r.level,
+                "product": r.product,
+                "chapter_title": r.chapter_title,
+                "fields": r.fields,
+            }
+            for r in rows
+        ],
     }
 
 

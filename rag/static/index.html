@@ -1257,6 +1257,7 @@ header::after{
     <button class="tab" role="tab" aria-selected="true"  data-view="ask"    data-t="tabAsk"></button>
     <button class="tab" role="tab" aria-selected="false" data-view="path"   data-t="tabPath"></button>
     <button class="tab" role="tab" aria-selected="false" data-view="verify" data-t="tabVerify"></button>
+    <button class="tab" role="tab" aria-selected="false" data-view="hsn"    data-t="tabHsn"></button>
   </nav>
 </header>
 
@@ -1294,6 +1295,18 @@ header::after{
       </div>
     </div>
     <div id="markout"></div>
+  </section>
+
+  <section class="view" id="v-hsn">
+    <div class="card intro">
+      <h2 data-t="hsnH"></h2>
+      <p data-t="hsnP"></p>
+      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+        <input id="hsnq" class="inline" type="text" />
+        <button class="go" id="hsngo" data-t="hsnGo"></button>
+      </div>
+    </div>
+    <div id="hsnout"></div>
   </section>
 </main>
 
@@ -1346,7 +1359,7 @@ const I18N={
   noVoice:'Speech is not available in this browser.',
   followH:'You might also ask', badcite:'removed invalid citation',
   err:'Something went wrong', unavailable:'Service unavailable',
-  tabAsk:'Ask', tabPath:'Which scheme applies?', tabVerify:'Check a mark',
+  tabAsk:'Ask', tabPath:'Which scheme applies?', tabVerify:'Check a mark', tabHsn:'HSN lookup',
   pathH:'Find the scheme that applies to you', pathP:'For companies and consumers alike — Indian or foreign, selling here, importing or exporting. Every requirement shown is cited to a real BIS document.',
   pathGo:'Show my pathway', pathPickAll:'Please answer all the questions first.', pathScheme:'Applicable scheme', pathWhy:'Why this scheme',
   pathSteps:'What the documents require', pathAgain:'Start over',
@@ -1355,6 +1368,8 @@ const I18N={
   verifyGo:'Check format', verifyPh:'e.g. CM/L 6300082303, A1B2C3, or IS 17440',
   verifyFormat:'Format', verifyCaution:'Important', verifyWhere:'Verify officially at',
   verifyAsk:'Ask about this', print:'Print / save as PDF',
+  hsnH:'Look up an HSN code', hsnP:'Enter an exact HSN code for an instant match, or a product name to search. Import and export documents are read directly from the HSN Import-Export Compliance Matrix — nothing here is summarised by AI.',
+  hsnGo:'Look up', hsnPh:'e.g. 1011010, or "gold jewellery"', hsnNoMatch:'No matching row found. Try the exact HSN code, or a different product name.',
  },
  hi:{
   tagline:'भारतीय मानक और बीआईएस के लिए प्रमाणित सहायक',
@@ -1382,7 +1397,7 @@ const I18N={
   noVoice:'इस ब्राउज़र में वाणी उपलब्ध नहीं है।',
   followH:'आप यह भी पूछ सकते हैं', badcite:'अमान्य संदर्भ हटाया गया',
   err:'कुछ गड़बड़ हो गई', unavailable:'सेवा उपलब्ध नहीं है',
-  tabAsk:'प्रश्न', tabPath:'कौन सी योजना लागू?', tabVerify:'चिह्न जाँचें',
+  tabAsk:'प्रश्न', tabPath:'कौन सी योजना लागू?', tabVerify:'चिह्न जाँचें', tabHsn:'HSN खोजें',
   pathH:'आप पर लागू योजना जानें', pathP:'कंपनियों और उपभोक्ताओं दोनों के लिए — भारतीय या विदेशी, भारत में बिक्री, आयात या निर्यात। हर आवश्यकता का संदर्भ वास्तविक बीआईएस दस्तावेज़ से है।',
   pathGo:'मेरा मार्ग दिखाएँ', pathPickAll:'कृपया पहले सभी प्रश्नों के उत्तर दें।', pathScheme:'लागू योजना', pathWhy:'यह योजना क्यों',
   pathSteps:'दस्तावेज़ों के अनुसार आवश्यकताएँ', pathAgain:'फिर से शुरू करें',
@@ -1391,6 +1406,8 @@ const I18N={
   verifyGo:'प्रारूप जाँचें', verifyPh:'जैसे CM/L 6300082303, A1B2C3, या IS 17440',
   verifyFormat:'प्रारूप', verifyCaution:'महत्वपूर्ण', verifyWhere:'आधिकारिक सत्यापन',
   verifyAsk:'इसके बारे में पूछें', print:'प्रिंट / PDF सहेजें',
+  hsnH:'HSN कोड खोजें', hsnP:'सटीक मिलान के लिए HSN कोड दर्ज करें, या उत्पाद का नाम खोजें। आयात और निर्यात दस्तावेज़ सीधे HSN आयात-निर्यात अनुपालन मैट्रिक्स से पढ़े जाते हैं — यह AI द्वारा संक्षेपित नहीं है।',
+  hsnGo:'खोजें', hsnPh:'जैसे 1011010, या "सोने के आभूषण"', hsnNoMatch:'कोई मेल खाती पंक्ति नहीं मिली। सटीक HSN कोड या कोई अन्य उत्पाद नाम आज़माएँ।',
  }};
 const t=k=>(I18N[LANG]&&I18N[LANG][k])||I18N.en[k]||k;
 
@@ -1443,6 +1460,7 @@ function applyLang(){
   renderExamples();
   renderHealth();   // chips + hint are built in JS, so re-render them too
   const mq=$('#markq'); if(mq) mq.placeholder=t('verifyPh');
+  const hq=$('#hsnq'); if(hq) hq.placeholder=t('hsnPh');
   if(typeof PATHQ!=='undefined' && PATHQ.length) renderPathQuestions();
   if(recog) recog.lang = LANG==='hi' ? 'hi-IN' : 'en-IN';
 }
@@ -1857,6 +1875,27 @@ async function decodeMark(v){
   }catch(e){ $('#markout').innerHTML=`<div class="card"><div class="empty">${esc(String(e))}</div></div>`; }
 }
 
+/* ── HSN lookup ────────────────────────────────────────────────────── */
+async function lookupHsn(v){
+  if(!v||!v.trim()) return;
+  $('#hsnout').innerHTML='<div class="card"><div class="empty"><span class="sp"></span></div></div>';
+  try{
+    const d=await (await fetch('/hsn',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({value:v,language:LANG})})).json();
+    if(!d.found){
+      $('#hsnout').innerHTML=`<div class="card"><div class="empty">${esc(t('hsnNoMatch'))}</div></div>`;
+      return;
+    }
+    const badge = d.matched_by==='code'
+      ? '<span class="badge ok">✓ '+esc(t('verifyFormat'))+'</span>'
+      : '<span class="badge">'+d.rows.length+' match'+(d.rows.length>1?'es':'')+'</span>';
+    let h=`<div class="card" style="padding:20px 24px">${badge}
+      <div class="answer" style="margin-top:12px">${esc(d.text)}</div>
+      </div>`;
+    $('#hsnout').innerHTML=h;
+  }catch(e){ $('#hsnout').innerHTML=`<div class="card"><div class="empty">${esc(String(e))}</div></div>`; }
+}
+
 /* ── Wiring for the new views ──────────────────────────────────────── */
 document.addEventListener('click',e=>{
   const p=e.target.closest('[data-prod]');
@@ -1870,6 +1909,8 @@ $('#pathgo').onclick=showPathway;
 $('#pathreset').onclick=()=>{PATHA={};renderPathQuestions();$('#pathout').innerHTML='';};
 $('#markgo').onclick=()=>decodeMark($('#markq').value);
 $('#markq').addEventListener('keydown',e=>{if(e.key==='Enter')decodeMark($('#markq').value);});
+$('#hsngo').onclick=()=>lookupHsn($('#hsnq').value);
+$('#hsnq').addEventListener('keydown',e=>{if(e.key==='Enter')lookupHsn($('#hsnq').value);});
 
 applyLang(); loadHealth(); setInterval(loadHealth,30000);
 </script>
